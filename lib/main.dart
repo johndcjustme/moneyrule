@@ -1,0 +1,82 @@
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:moneyrule/src/views/dashboard/index.dart';
+import 'package:moneyrule/src/views/login/index.dart';
+import 'package:moneyrule/src/views/new_expense_income/index.dart';
+import 'package:moneyrule/src/views/partials/what.dart';
+
+import 'src/models/category.dart';
+import 'src/models/user.dart';
+import 'src/models/transaction_model.dart';
+import 'src/views/account/index.dart';
+import 'src/views/transactions/index.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(CategoryAdapter());
+  Hive.registerAdapter(TransactionModelAdapter());
+  Hive.registerAdapter(UserAdapter());
+
+  // await Hive.deleteBoxFromDisk('users');
+
+  final userBox = await Hive.openBox<User>('users');
+  final categoryBox = await Hive.openBox<Category>('categories');
+  await Hive.openBox<TransactionModel>('transactions');
+  await Hive.openBox('session');
+
+  if (userBox.isEmpty) {
+    await userBox.add(User(name: 'admin', password: '1234', isLogin: false));
+  }
+
+  // Insert default categories if empty
+  if (categoryBox.isEmpty) {
+    await categoryBox.add(Category(name: 'Needs', percentage: 50, amount: 0));
+    await categoryBox.add(Category(name: 'Wants', percentage: 30, amount: 0));
+    await categoryBox.add(Category(name: 'Save', percentage: 20, amount: 0));
+  }
+
+  runApp(const MainApp());
+}
+
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Finance Tracker',
+      initialRoute: '/',
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system, // 🌗 This respects system dark/light mode
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black87,
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.black12,
+          border: OutlineInputBorder(),
+          labelStyle: TextStyle(color: Colors.white70),
+        ),
+      ),
+      routes: {
+        '/': (_) => const LoginPage(),
+        '/dashboard': (_) => const DashboardPage(),
+        '/new-expense': (_) => const NewTransactionPage(isIncome: false),
+        '/new-income': (_) => const NewTransactionPage(isIncome: true),
+        '/transactions': (_) => const AllTransactionsPage(), // ✅ New route
+        '/account': (_) => const AccountPage(), // ✅ New route
+        '/budget-rule': (_) => const BudgetRuleInfo(),
+      },
+    );
+  }
+}
