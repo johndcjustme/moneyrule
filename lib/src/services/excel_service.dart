@@ -6,9 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/category.dart';
 import '../models/transaction_model.dart';
+import 'package:path/path.dart' as p;
 
 class ExcelService {
-  static Future<File> exportTransactions() async {
+  static Future<File?> exportTransactions() async {
     final excel = Excel.createExcel();
     final Sheet sheet = excel['Transactions'];
 
@@ -35,13 +36,19 @@ class ExcelService {
       ]);
     }
 
-    final dir = await getApplicationDocumentsDirectory();
+    // Let user pick folder
+    String? outputDir = await FilePicker.platform.getDirectoryPath();
 
-    final file = File('${dir.path}/transactions.xlsx');
+    if (outputDir == null) {
+      print('❌ User canceled folder selection');
+      return null;
+    }
+
+    final filePath = p.join(outputDir, 'transactions.xlsx');
+    final file = File(filePath);
     await file.writeAsBytes(excel.encode()!);
 
-
-    print('✅ Exported to: ${file.path}');
+    print('✅ Exported to: $filePath');
     return file;
   }
 

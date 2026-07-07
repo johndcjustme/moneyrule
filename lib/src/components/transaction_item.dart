@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:moneyrule/src/helpers/helper.dart';
+import 'package:moneyrule/src/utils/theme_color.dart';
 
 class TransactionItem extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool isNewIncome;
   final double amount;
-  final void Function(String item)? onTap;
+  final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final VoidCallback? onDelete;
 
   const TransactionItem({
     super.key,
@@ -17,11 +19,12 @@ class TransactionItem extends StatelessWidget {
     this.isNewIncome = false,
     this.onTap,
     this.onLongPress,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    final tile = ListTile(
       title: Text(title),
       subtitle: Text(
         '${isNewIncome ? 'Income' : 'Expense'} • ${subtitle ?? 'Unknown'}',
@@ -30,11 +33,48 @@ class TransactionItem extends StatelessWidget {
       trailing: Text(
         Helper.currencyFormatter(amount),
         style: TextStyle(
-          color: isNewIncome ? Colors.green : Colors.orange,
+          color: isNewIncome ? ThemeColor.income : ThemeColor.expense,
           fontWeight: FontWeight.bold,
         ),
       ),
       onLongPress: onLongPress,
+      onTap: onTap,
+    );
+
+    if (onDelete == null) return tile;
+
+    return Dismissible(
+      key: key ?? ValueKey('$title-${amount.toString()}-${subtitle ?? ''}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        color: Colors.red,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Transaction'),
+            content: const Text(
+                'Are you sure you want to delete this transaction?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+        return confirm ?? false;
+      },
+      onDismissed: (_) => onDelete!(),
+      child: tile,
     );
   }
 }

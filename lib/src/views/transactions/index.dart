@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:moneyrule/src/components/edit_transaction_sheet.dart';
 import 'package:moneyrule/src/components/transaction_item.dart';
-import 'package:moneyrule/src/utils/excel_service.dart';
-import '../../helpers/helper.dart';
+import 'package:moneyrule/src/services/excel_service.dart';
 import '../../models/category.dart';
 import '../../models/transaction_model.dart';
 
@@ -29,9 +29,12 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
             onSelected: (value) async {
               if (value == 'export') {
                 final file = await ExcelService.exportTransactions();
+                
+                if (file?.path == null) return;
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Exported to: ${file.path}'),
+                    content: Text('Exported to: ${file?.path}'),
                     duration: const Duration(seconds: 5),
                   ),
                 );
@@ -146,33 +149,18 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                 final category = catBox.get(tx.categoryId);
                 return TransactionItem(
                   title: tx.description,
-                  subtitle: category?.name,
+                  subtitle:
+                      '${category?.name ?? 'Unknown'} • ${tx.createdAt.toLocal().toString().split('.')[0]}',
                   amount: tx.amount,
                   isNewIncome: tx.isNewIncome,
-                  onLongPress: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Transaction'),
-                        content: const Text(
-                            'Are you sure you want to delete this transaction?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              tx.delete();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Delete',
-                                style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
+                  onDelete: () {
+                    tx.delete();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Transaction deleted successfully')),
                     );
                   },
+                  onTap: () => showEditTransactionSheet(context, tx),
                 );
               }),
             ],
