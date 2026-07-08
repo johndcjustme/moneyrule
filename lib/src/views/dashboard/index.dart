@@ -24,6 +24,78 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _showIncome = false;
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
+  final TextEditingController _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final userBox = Hive.box<User>('users');
+    User? currentUser;
+    try {
+      currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
+    } catch (e) {
+      currentUser = null;
+    }
+    if (currentUser != null) {
+      _notesController.text = currentUser.notes ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  void _saveNotes() {
+    final userBox = Hive.box<User>('users');
+    User? currentUser;
+    try {
+      currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
+    } catch (e) {
+      currentUser = null;
+    }
+    if (currentUser != null && mounted) {
+      currentUser.notes = _notesController.text;
+      currentUser.save();
+      User.updateNotes(context, currentUser, _notesController.text);
+    }
+  }
+
+  void _showNotesDialog() {
+    final dialogController = TextEditingController(text: _notesController.text);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Notes'),
+        content: TextField(
+          style: const TextStyle(color: ThemeColor.textSecondary),
+          controller: dialogController,
+          maxLines: 10,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Enter your notes here',
+            filled: false,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _notesController.text = dialogController.text;
+              _saveNotes();
+              setState(() {});
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
           final recentTransactions = transactions.toList()
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          final latestSeven = recentTransactions.take(7).toList();
+          final latestSeven = recentTransactions.take(5).toList();
 
           final today = DateTime.now();
           final todayExpenses = transactions
@@ -111,7 +183,12 @@ class _DashboardPageState extends State<DashboardPage> {
               .toList();
           final todayExpenseTotal = todayExpenses.fold<double>(
               0, (sum, tx) => sum + tx.amount);
-          final todayCategoryNames = todayExpenses
+
+
+          final sortedExpenses = todayExpenses.toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+          final todayCategoryNames = sortedExpenses
               .map((tx) => tx.description)
               .toSet()
               .toList();
@@ -130,28 +207,28 @@ class _DashboardPageState extends State<DashboardPage> {
 
           return Column(
             children: [
-              // 💰 Overall Summary Card
-              
-
-              // 📊 Category Breakdown
-
               Expanded(
                 child: ListView(
                   children: [
                     
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 75), child: 
+                    Padding(padding: const EdgeInsets.only(left: 16, right: 16, bottom: 75, top: 20), child: 
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Row(children: [
+                        Text('Split', style: TextStyle(fontSize: 14, color: ThemeColor.textTertiary)),
+                        Text('Wise', style: TextStyle(fontSize: 14, color: ThemeColor.income)),
+                      ]),
+                      const SizedBox(height: 65),
                       const Text('Hello,', style: TextStyle(fontSize: 28, color: ThemeColor.textSecondary)),
                       Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: 28, color: ThemeColor.textPrimary))
                       // Row(children: [],)
                     ]),
 
                      PopupMenuButton<String>(
-            icon: CircleAvatar(
+            icon: const CircleAvatar(
               radius: 18,
               backgroundColor: ThemeColor.expense,
               child: Icon(Icons.person, size: 20, color: ThemeColor.textSecondary),
@@ -694,10 +771,40 @@ class _DashboardPageState extends State<DashboardPage> {
                           onTap: () => showEditTransactionSheet(context, tx),
                         );
                       })
-                    else const Center(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), child: Text('No recent transactions'))),
-                    const SizedBox(
+                    else const Center(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), child: Text('No recent transactions', style: TextStyle(color: ThemeColor.textTertiary),))),
+                      Padding(
+                  padding: const EdgeInsets.only(bottom: 8, top: 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('NOTES', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+                            IconButton(
+                              onPressed: _showNotesDialog,
+                              icon: const Icon(Icons.edit, size: 18, color: ThemeColor.textPrimary,),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // const SizedBox(height: 4),
+                      Padding(padding: const EdgeInsets.all(16), child: Card(color: const Color.fromARGB(144, 28, 28, 28), 
+                      child: Padding(padding: const EdgeInsets.all(16), child: Text(
+                        _notesController.text.isEmpty ? 'No notes' : _notesController.text,
+                        style: const TextStyle(
+                          color: ThemeColor.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ))))
+                    ],
+                  ),
+                ),
+                  const SizedBox(
                       height: 150,
-                    )
+                    ),
                   ],
                 ),
               ),

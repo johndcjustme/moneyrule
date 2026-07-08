@@ -14,10 +14,14 @@ class User extends HiveObject {
   @HiveField(2)
   bool isLogin;
 
+  @HiveField(3)
+  String? notes;
+
   User({
     required this.name,
     required this.password,
     this.isLogin = false, // default to logged out
+    this.notes,
   });
 
   static void updateData(BuildContext context, user, updatedName, updatedPassword) {
@@ -27,6 +31,16 @@ class User extends HiveObject {
       user!.save();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account updated successfully')),
+      );
+    }
+  }
+
+  static void updateNotes(BuildContext context, user, updatedNotes) {
+    if (user != null) {
+      user!.notes = updatedNotes;
+      user!.save();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Notes saved successfully')),
       );
     }
   }

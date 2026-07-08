@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'moneyrule',
+          'splitwise',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
