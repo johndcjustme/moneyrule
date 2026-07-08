@@ -4,6 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/category.dart';
 import '../models/transaction_model.dart';
 import 'package:path/path.dart' as p;
@@ -13,7 +14,6 @@ class ExcelService {
     final excel = Excel.createExcel();
     final Sheet sheet = excel['Transactions'];
 
-    // Headers
     sheet.appendRow([
       'Date',
       'Description',
@@ -36,19 +36,31 @@ class ExcelService {
       ]);
     }
 
-    // Let user pick folder
-    String? outputDir = await FilePicker.platform.getDirectoryPath();
+    final directory = await getExternalStorageDirectory();
+    if (directory == null) return null;
 
-    if (outputDir == null) {
-      print('❌ User canceled folder selection');
-      return null;
-    }
-
-    final filePath = p.join(outputDir, 'transactions.xlsx');
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileName = 'transactions_$timestamp.xlsx';
+    final filePath = p.join(directory.path, fileName);
     final file = File(filePath);
     await file.writeAsBytes(excel.encode()!);
 
-    print('✅ Exported to: $filePath');
+    try {
+      final status = await Permission.storage.request();
+      if (status.isGranted) {
+        final outputDir = await FilePicker.platform.getDirectoryPath();
+        if (outputDir != null) {
+          final finalPath = p.join(outputDir, fileName);
+          final finalFile = File(finalPath);
+          await finalFile.writeAsBytes(await file.readAsBytes());
+          await file.delete();
+          return finalFile;
+        }
+      }
+    } catch (e) {
+      print('Directory picker failed: $e');
+    }
+
     return file;
   }
 
