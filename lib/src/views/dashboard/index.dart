@@ -24,18 +24,138 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _showIncome = false;
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
-  int _monthlyYear = DateTime.now().year;
 
   @override
   Widget build(BuildContext context) {
     final transactionBox = Hive.box<TransactionModel>('transactions');
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Overview'),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
+      // appBar: AppBar(
+      //   title: const Text('SplitWise'),
+      //   actions: [
+      //     PopupMenuButton<String>(
+      //       icon: const Icon(Icons.more_vert),
+      //       onSelected: (value) {
+      //         if (value == 'account') {
+      //           Navigator.pushNamed(context, '/account');
+      //         } else if (value == 'logout') {
+      //           showDialog(
+      //             context: context,
+      //             builder: (context) => AlertDialog(
+      //               title: const Text('Logout'),
+      //               content: const Text('Are you sure you want to logout?'),
+      //               actions: [
+      //                 TextButton(
+      //                   onPressed: () => Navigator.pop(context),
+      //                   child: const Text('Cancel'),
+      //                 ),
+      //                 TextButton(
+      //                   onPressed: () async {
+      //                     await Auth.logout(context);
+      //                   },
+      //                   child: const Text('Logout'),
+      //                 ),
+      //               ],
+      //             ),
+      //           );
+      //         }
+      //       },
+      //       itemBuilder: (context) => [
+      //         const PopupMenuItem(
+      //           value: 'account',
+      //           child: ListTile(
+      //             leading: Icon(Icons.account_circle),
+      //             title: Text('Account Settings'),
+      //           ),
+      //         ),
+      //         const PopupMenuItem(
+      //           value: 'logout',
+      //           child: ListTile(
+      //             leading: Icon(Icons.logout),
+      //             title: Text('Logout'),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      // ),
+      body: SafeArea(child: ValueListenableBuilder(
+        valueListenable: transactionBox.listenable(),
+        builder: (context, Box<TransactionModel> txBox, _) {
+          final transactions = txBox.values.toList();
+
+          final incomeTotal = transactions
+              .where((tx) => tx.isNewIncome)
+              .fold<double>(0, (sum, tx) => sum + tx.amount);
+
+          final expenseTotal = transactions
+              .where((tx) => !tx.isNewIncome)
+              .fold<double>(0, (sum, tx) => sum + tx.amount);
+
+          final balance = incomeTotal - expenseTotal;
+
+          final categoryBox = Hive.box<Category>('categories');
+          final categories = categoryBox.values.toList();
+
+          final recentTransactions = transactions.toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          final latestSeven = recentTransactions.take(7).toList();
+
+          final today = DateTime.now();
+          final todayExpenses = transactions
+              .where((tx) =>
+                  !tx.isNewIncome &&
+                  tx.createdAt.year == today.year &&
+                  tx.createdAt.month == today.month &&
+                  tx.createdAt.day == today.day)
+              .toList();
+          final todayExpenseTotal = todayExpenses.fold<double>(
+              0, (sum, tx) => sum + tx.amount);
+          final todayCategoryNames = todayExpenses
+              .map((tx) => tx.description)
+              .toSet()
+              .toList();
+
+          final double total = incomeTotal + expenseTotal;
+          final double incomeRatio = total == 0 ? 0.5 : balance / total;
+          // final double expenseRatio = total == 0 ? 0.5 : expenseTotal / total;
+
+          final userBox = Hive.box<User>('users');
+          User? currentUser;
+          try {
+            currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
+          } catch (e) {
+            currentUser = null;
+          }
+
+          return Column(
+            children: [
+              // 💰 Overall Summary Card
+              
+
+              // 📊 Category Breakdown
+
+              Expanded(
+                child: ListView(
+                  children: [
+                    
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 75), child: 
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('Hello,', style: TextStyle(fontSize: 28, color: ThemeColor.textSecondary)),
+                      Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: 28, color: ThemeColor.textPrimary))
+                      // Row(children: [],)
+                    ]),
+
+                     PopupMenuButton<String>(
+            icon: CircleAvatar(
+              radius: 18,
+              backgroundColor: ThemeColor.expense,
+              child: Icon(Icons.person, size: 20, color: ThemeColor.textSecondary),
+            ),
             onSelected: (value) {
               if (value == 'account') {
                 Navigator.pushNamed(context, '/account');
@@ -78,251 +198,312 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ],
           ),
-        ],
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: transactionBox.listenable(),
-        builder: (context, Box<TransactionModel> txBox, _) {
-          final transactions = txBox.values.toList();
-
-          final incomeTotal = transactions
-              .where((tx) => tx.isNewIncome)
-              .fold<double>(0, (sum, tx) => sum + tx.amount);
-
-          final expenseTotal = transactions
-              .where((tx) => !tx.isNewIncome)
-              .fold<double>(0, (sum, tx) => sum + tx.amount);
-
-          final balance = incomeTotal - expenseTotal;
-
-          final categoryBox = Hive.box<Category>('categories');
-          final categories = categoryBox.values.toList();
-
-          final recentTransactions = transactions.toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-          final latestSeven = recentTransactions.take(7).toList();
-
-          final double total = incomeTotal + expenseTotal;
-          final double incomeRatio = total == 0 ? 0.5 : balance / total;
-          final double expenseRatio = total == 0 ? 0.5 : expenseTotal / total;
-
-          final userBox = Hive.box<User>('users');
-          User? currentUser;
-          try {
-            currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
-          } catch (e) {
-            currentUser = null;
-          }
-
-          return Column(
-            children: [
-              // 💰 Overall Summary Card
-              
-
-              // 📊 Category Breakdown
-
-              Expanded(
-                child: ListView(
-                  children: [
                     
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20), child: 
-                    Row(children: [
-                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Hello,', style: TextStyle(fontSize: 24, color: ThemeColor.text_secondary)),
-                      Text('${currentUser?.name ?? 'User'}!', style: TextStyle(fontSize: 24, color: ThemeColor.text_primary))
-                      // Row(children: [],)
-                    ])
                     ],)),
 
-                    Card(
-                  margin: const EdgeInsets.all(0),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0)),
-                  child: Column(
-                    children: [
-                       Row(
+                    Row(
                           // color: Colors.red,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Container(
-                                  color: Colors.black38,
-                                  child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 20),
+                              child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
                                       child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                          const Row(children: [
-                                            Text(
-                                            'TOTAL INCOME',
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                          )
-                                          ]),
+
+                                            if (todayExpenses.isNotEmpty)
+                                              Padding(padding: const EdgeInsets.only(bottom: 32), child: SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding: EdgeInsets.only(right: 24),
+                                                        child: Column(
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                              const Text('TODAY: ',
+                                                                  style: TextStyle(
+                                                                      color: ThemeColor.textSecondary, fontSize: 14)),
+                                                              Text(Helper.currencyFormatter(
+                                                                  todayExpenseTotal, '-'), style: const TextStyle(color: ThemeColor.textPrimary, fontSize: 14, fontWeight: FontWeight.bold))
+                                                            ],
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    ...List.generate(
+                                                        todayCategoryNames.take(10).length,
+                                                        (i) {
+                                                      final name =
+                                                          todayCategoryNames[i];
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(right: 16),
+                                                        child: Text(name,
+                                                            style: const TextStyle(
+                                                                color: ThemeColor.textTertiary, fontSize: 12)),
+                                                      );
+                                                    }),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(right: 16),
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Navigator.pushNamed(
+                                                              context,
+                                                              '/transactions');
+                                                        },
+                                                        child: const Row(children: [
+                                                          Text('More Transactions',
+                                                            style: TextStyle(
+                                                                color: ThemeColor.textTertiary, fontSize: 12)),
+                                                          SizedBox(width: 2),
+                                                          Icon(Icons.chevron_right, size: 14, color: ThemeColor.textTertiary,)
+                                                        ],),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ))
+                                            else const Padding(padding: EdgeInsets.only(bottom: 32), child: Text('No expenses recorded today', style: TextStyle(color: ThemeColor.textTertiary))),
+
+                                              
+
+                                            // SizedBox(height: 28,),
+                                          // const Row(children: [
+                                          //   Text(
+                                          //   'TOTAL INCOME',
+                                          //   style: TextStyle(
+                                          //       color: Colors.grey,
+                                          //       fontSize: 12),
+                                          // )
+                                          // ]),
                                           // const SizedBox(
                                           //   width: 10,
                                           // ),
                                           Row(children: [
-Text(
-                                            _showIncome
-                                                ? Helper.currencyFormatter(
-                                                    incomeTotal)
-                                                : '••••••',
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                              // fontWeight: FontWeight.bold
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 8,
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
+                                            Text(
                                               _showIncome
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
-                                              color: Colors.grey,
-                                              size: 18,
+                                                  ? Helper.currencyFormatter(
+                                                      incomeTotal)
+                                                  : '••••••',
+                                              style: const TextStyle(
+                                                fontSize: 26,
+                                                // fontWeight: FontWeight.bold
+                                              ),
                                             ),
-                                            padding: EdgeInsets.zero,
-                                            constraints:
-                                                const BoxConstraints(),
-                                            onPressed: () {
-                                              setState(() {
-                                                _showIncome = !_showIncome;
-                                              });
-                                            },
-                                          )
+                                            // const SizedBox(
+                                            //   width: 4,
+                                            // ),
+                                            IconButton(
+                                              icon: Icon(
+                                                _showIncome
+                                                    ? Icons.visibility_off
+                                                    : Icons.visibility,
+                                                color: Colors.grey,
+                                                size: 18,
+                                              ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              onPressed: () {
+                                                setState(() {
+                                                  _showIncome = !_showIncome;
+                                                });
+                                              },
+                                            )
                                           ])
                                         ],
-                                          ))),
+                                          )),
                             )
                           ]),
+
+
+                      // Padding(padding: const EdgeInsets.only(top: 7, left: 16, right: 16), child: SizedBox(
+                      //   width: double.infinity,
+                      //   height: 5,
+                      //   child: Row(
+                      //     children: [
+                      //       Expanded(
+                      //         flex: (incomeRatio * 1000).round(),
+                      //         child: Container(
+                      //           decoration: const BoxDecoration(
+                      //             color: ThemeColor.income,
+                      //             borderRadius: BorderRadius.only(
+                      //               topLeft: Radius.circular(15.0),
+                      //               bottomLeft: Radius.circular(15.0),
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //       Expanded(
+                      //         flex: (expenseRatio * 1000).round(),
+                      //         child: Container(
+                      //           decoration: const BoxDecoration(
+                      //             color: ThemeColor.expense,
+                      //             borderRadius: BorderRadius.only(
+                      //               topRight: Radius.circular(15.0),
+                      //               bottomRight: Radius.circular(15.0),
+                      //             ),
+
+                      //           ),
+                      //         ),
+                      //       ),
+                        
+                      //     ],
+                      //   ),
+                      // ),),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 32),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // const Text(
-                            //   'REMAINING BALANCE',
-                            //   style:
-                            //       TextStyle(color: Colors.grey, fontSize: 12),
-                            // ),
-                            // Text(Helper.currencyFormatter(balance),
-                            //     style: TextStyle(
-                            //         fontSize: 32,
-                            //         color: balance < 0
-                            //             ? Colors.red
-                            //             : Colors.white)),
-                            // const SizedBox(height: 14),
-                            Row(
-                              children: [
-                                Expanded(
-                                    child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_downward_sharp,
-                                      color: ThemeColor.income,
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'BALANCE',
-                                          style: TextStyle(
-                                              fontSize: 10, color: Colors.grey),
-                                        ),
-                                        Text(
-                                          Helper.currencyFormatter(balance),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: balance < 0
-                                                  ? Colors.red
-                                                  : Colors.white),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                )),
-                                Expanded(
-                                    child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_upward_sharp,
-                                      color: ThemeColor.expense,
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'EXPENSES',
-                                          style: TextStyle(
-                                              fontSize: 10, color: Colors.grey),
-                                        ),
-                                        Text(
-                                          Helper.currencyFormatter(
-                                              expenseTotal),
-                                          style: const TextStyle(fontSize: 18),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                )),
-                              ],
-                            )
-                            // const Divider(height: 20),
-                            // Text(
-                            //   '🧮 Remaining Balance: ₱${balance.toStringAsFixed(2)}',
-                            //   style: TextStyle(
-                            //     color: balance >= 0 ? Colors.green : Colors.red,
-                            //     fontWeight: FontWeight.bold,
-                            //   ),
-                            // ),
-                          ],
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                        child: LinearProgressIndicator(
+                          value: total == 0 ? 0 : incomeRatio,
+                          backgroundColor: ThemeColor.textTertiary,
+                          valueColor: const AlwaysStoppedAnimation<Color>(ThemeColor.income),
+                          minHeight: 6.0,
+                          borderRadius: const BorderRadius.all(Radius.circular(4)),
                         ),
                       ),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 4,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: (incomeRatio * 1000).round(),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: ThemeColor.income,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: (expenseRatio * 1000).round(),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: ThemeColor.expense,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                        Text(Helper.currencyFormatter(balance, '+'), style: const TextStyle(fontSize: 16, color: ThemeColor.income, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 14),
+                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(fontSize: 16, color: ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
+                      ],),),
+
+
+                  // SizedBox(height: 20,),
+
+
+                  //   Card(
+                  // margin: const EdgeInsets.all(0),
+                  // elevation: 4,
+                  // shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(0)),
+                  // child: Column(
+                  //   children: [
+                       
+                  //     Padding(
+                  //       padding: const EdgeInsets.symmetric(
+                  //           horizontal: 16, vertical: 32),
+                  //       child: Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.stretch,
+                  //         children: [
+                  //           // const Text(
+                  //           //   'REMAINING BALANCE',
+                  //           //   style:
+                  //           //       TextStyle(color: Colors.grey, fontSize: 12),
+                  //           // ),
+                  //           // Text(Helper.currencyFormatter(balance),
+                  //           //     style: TextStyle(
+                  //           //         fontSize: 32,
+                  //           //         color: balance < 0
+                  //           //             ? Colors.red
+                  //           //             : Colors.white)),
+                  //           // const SizedBox(height: 14),
+                  //           Row(
+                  //             children: [
+                  //               Expanded(
+                  //                   child: Row(
+                  //                 children: [
+                  //                   Icon(
+                  //                     Icons.arrow_downward_sharp,
+                  //                     color: ThemeColor.income,
+                  //                   ),
+                  //                   const SizedBox(
+                  //                     width: 10,
+                  //                   ),
+                  //                   Column(
+                  //                     crossAxisAlignment:
+                  //                         CrossAxisAlignment.start,
+                  //                     children: [
+                  //                       const Text(
+                  //                         'BALANCE',
+                  //                         style: TextStyle(
+                  //                             fontSize: 10, color: Colors.grey),
+                  //                       ),
+                  //                       Text(
+                  //                         Helper.currencyFormatter(balance),
+                  //                         style: TextStyle(
+                  //                             fontSize: 18,
+                  //                             color: balance < 0
+                  //                                 ? Colors.red
+                  //                                 : Colors.white),
+                  //                       ),
+                  //                     ],
+                  //                   )
+                  //                 ],
+                  //               )),
+                  //               Expanded(
+                  //                   child: Row(
+                  //                 children: [
+                  //                   Icon(
+                  //                     Icons.arrow_upward_sharp,
+                  //                     color: ThemeColor.expense,
+                  //                   ),
+                  //                   const SizedBox(
+                  //                     width: 10,
+                  //                   ),
+                  //                   Column(
+                  //                     crossAxisAlignment:
+                  //                         CrossAxisAlignment.start,
+                  //                     children: [
+                  //                       const Text(
+                  //                         'EXPENSES',
+                  //                         style: TextStyle(
+                  //                             fontSize: 10, color: Colors.grey),
+                  //                       ),
+                  //                       Text(
+                  //                         Helper.currencyFormatter(
+                  //                             expenseTotal),
+                  //                         style: const TextStyle(fontSize: 18),
+                  //                       ),
+                  //                     ],
+                  //                   )
+                  //                 ],
+                  //               )),
+                  //             ],
+                  //           )
+                  //           // const Divider(height: 20),
+                  //           // Text(
+                  //           //   '🧮 Remaining Balance: ₱${balance.toStringAsFixed(2)}',
+                  //           //   style: TextStyle(
+                  //           //     color: balance >= 0 ? Colors.green : Colors.red,
+                  //           //     fontWeight: FontWeight.bold,
+                  //           //   ),
+                  //           // ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //     SizedBox(
+                  //       width: double.infinity,
+                  //       height: 4,
+                  //       child: Row(
+                  //         children: [
+                  //           Expanded(
+                  //             flex: (incomeRatio * 1000).round(),
+                  //             child: Container(
+                  //               decoration: BoxDecoration(
+                  //                 color: ThemeColor.income,
+                  //               ),
+                  //             ),
+                  //           ),
+                  //           Expanded(
+                  //             flex: (expenseRatio * 1000).round(),
+                  //             child: Container(
+                  //               decoration: BoxDecoration(
+                  //                 color: ThemeColor.expense,
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
                      
-                    ],
-                  )),
+                  //   ],
+                  // )),
                     const SizedBox(
-                      height: 38,
+                      height: 27,
                     ),
                     ...categories.map((cat) {
                       final catId = cat.key as int;
@@ -339,14 +520,14 @@ Text(
 
                       return ListTile(
                         // contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        leading: const Icon(
-                          Icons.star,
-                          // color: Colors.grey, // Customize as needed
-                          size: 20,
-                        ),
+                        // leading: const Icon(
+                        //   Icons.star,
+                        //   // color: Colors.grey, // Customize as needed
+                        //   size: 20,
+                        // ),
 
                         trailing: SizedBox(
-                          width: 170, // ⬅️ Increased width for better layout
+                          width: 200, // ⬅️ Increased width for better layout
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -357,19 +538,19 @@ Text(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      Helper.currencyFormatter(expenseForCat),
-                                      style: TextStyle(
-                                        color: ThemeColor.expense,
+                                      Helper.currencyFormatter(expenseForCat, '-'),
+                                      style: const TextStyle(
+                                        color: ThemeColor.textSecondary,
                                         fontSize: 14,
                                         height: 1.2,
                                       ),
                                     ),
                                     Text(
-                                      Helper.currencyFormatter(balanceForCat),
+                                      Helper.currencyFormatter(balanceForCat, balanceForCat >= 0 ? '+' : ''),
                                       style: TextStyle(
                                         color: balanceForCat >= 0
                                             ? ThemeColor.income
-                                            : Colors.red,
+                                            : ThemeColor.danger,
                                         fontSize: 14,
                                         height: 1.2,
                                       ),
@@ -386,7 +567,7 @@ Text(
                                       balanceForCat < 0 ? 0 : balanceForCat,
                                   "Expenses": expenseForCat,
                                 },
-                                colorList: [
+                                colorList: const [
                                   ThemeColor.income,
                                   ThemeColor.expense
                                 ],
@@ -401,11 +582,11 @@ Text(
                             ],
                           ),
                         ),
-                        title: Text(cat.name),
+                        title: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                            'All: ${Helper.currencyFormatter(totalIncome)}',
+                            Helper.currencyFormatter(totalIncome),
                             style: const TextStyle(
-                                color: Colors.grey, fontSize: 12)),
+                                color: ThemeColor.textSecondary)),
                         // subtitle: Column(
                         //   crossAxisAlignment: CrossAxisAlignment.start,
                         //   // mainAxisSize: MainAxisSize.min,
@@ -423,68 +604,97 @@ Text(
                         // ),
                       );
                     }),
-                       const SizedBox(
-                      height: 40,
-                    ),
-                    // 📈 Daily Expenses Chart
-                    _buildDailyExpenseChart(transactions),
-                    // 📊 Monthly Expenses Chart
-                    _buildMonthlyExpenseChart(transactions),
+                     const SizedBox(
+                       height: 32,
+                     ),
+                     Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 16),
+                       child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           DropdownButton<int>(
+                             value: _selectedMonth,
+                             underline: const SizedBox(),
+                             items: List.generate(12, (i) => i + 1)
+                                 .map((m) => DropdownMenuItem(
+                                       value: m,
+                                       child: Text(DateFormat('MMM').format(DateTime(2024, m))),
+                                     ))
+                                 .toList(),
+                             onChanged: (v) => setState(() => _selectedMonth = v!),
+                           ),
+                           const SizedBox(width: 16),
+                           DropdownButton<int>(
+                             value: _selectedYear,
+                             underline: const SizedBox(),
+                             items: List.generate(10, (i) => DateTime.now().year - 5 + i)
+                                 .map((y) => DropdownMenuItem(
+                                       value: y,
+                                       child: Text(y.toString()),
+                                     ))
+                                 .toList(),
+                             onChanged: (v) => setState(() => _selectedYear = v!),
+                           ),
+                         ],
+                       ),
+                     ),
+                     _buildDailyExpenseChart(transactions),
+                     _buildMonthlyExpenseChart(transactions),
                     // const Divider(height: 30),
                     const SizedBox(
-                      height: 45,
+                      height: 32,
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 16, bottom: 7),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'RECENT TRANSACTIONS',
+                            'RECENT',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              // color: Colors.grey
+                              color: ThemeColor.textPrimary
                             ),
                           ),
-                          OutlinedButton(
-                            // child: Text('hey'),
+                          TextButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/transactions');
                             },
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('View All'),
+                                Text('More', style: TextStyle(color: ThemeColor.textPrimary)),
                                 SizedBox(width: 4),
-                                Icon(Icons.arrow_forward_sharp,
-                                    size:
-                                        14), // This replaces the character arrow
+                                Icon(Icons.chevron_right,
+                                    size: 14, color: ThemeColor.textPrimary,),
                               ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    ...latestSeven.map((tx) {
-                      final category = categoryBox.get(tx.categoryId);
-                      return TransactionItem(
-                        isNewIncome: tx.isNewIncome,
-                        title: tx.description,
-                        subtitle: category?.name,
-                        amount: tx.amount,
-                        onDelete: () {
-                          tx.delete();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Transaction deleted successfully')),
-                          );
-                        },
-                        onTap: () => showEditTransactionSheet(context, tx),
-                      );
-                    }),
+                    if (latestSeven.isNotEmpty)
+                      ...latestSeven.map((tx) {
+                        final category = categoryBox.get(tx.categoryId);
+                        return TransactionItem(
+                          isNewIncome: tx.isNewIncome,
+                          title: tx.description,
+                          subtitle: category?.name,
+                          amount: tx.amount,
+                          onDelete: () {
+                            tx.delete();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Transaction deleted successfully')),
+                            );
+                          },
+                          onTap: () => showEditTransactionSheet(context, tx),
+                        );
+                      })
+                    else const Center(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), child: Text('No recent transactions'))),
                     const SizedBox(
                       height: 150,
                     )
@@ -494,7 +704,7 @@ Text(
             ],
           );
         },
-      ),
+      )),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -509,6 +719,7 @@ Text(
             heroTag: 'income',
             onPressed: () => Navigator.pushNamed(context, '/new-income'),
             backgroundColor: ThemeColor.income,
+            foregroundColor: ThemeColor.textTertiary,
             child: const Icon(Icons.add_circle), // or any icon you prefer
           ),
         ],
@@ -548,11 +759,7 @@ Text(
     final totalIncome = dailyIncome.fold<double>(
         0, (sum, v) => sum + v);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
+    return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,58 +767,25 @@ Text(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // const Text('DAILY INCOME & EXPENSES',
                 const Text('DAILY',
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    DropdownButton<int>(
-                      value: _selectedMonth,
-                      underline: const SizedBox(),
-                      items: List.generate(12, (i) => i + 1)
-                          .map((m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(DateFormat('MMM')
-                                    .format(DateTime(2024, m))),
-                              ))
-                          .toList(),
-                      onChanged: (v) =>
-                          setState(() => _selectedMonth = v!),
-                    ),
-                    const SizedBox(width: 8),
-                    DropdownButton<int>(
-                      value: _selectedYear,
-                      underline: const SizedBox(),
-                      items: years
-                          .map((y) => DropdownMenuItem(
-                                value: y,
-                                child: Text(y.toString()),
-                              ))
-                          .toList(),
-                      onChanged: (v) =>
-                          setState(() => _selectedYear = v!),
-                    ),
-                  ],
-                ),
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+            Row(
+              children: [
+                Text(Helper.currencyFormatter(totalIncome, '+'),
+                    style: const TextStyle(
+                        color: ThemeColor.income,
+                        fontSize: 14)),
+                const SizedBox(width: 12),
+                Text(Helper.currencyFormatter(totalExpense, '-'),
+                    style: const TextStyle(
+                        color: ThemeColor.textSecondary,
+                        fontSize: 14)),
+              ],
+            ),
               ],
             ),
             // const SizedBox(height: 4),
-            Row(
-              children: [
-                Text('Expense: ${Helper.currencyFormatter(totalExpense)}',
-                    style: TextStyle(
-                        color: ThemeColor.expense,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(width: 16),
-                Text('Income: ${Helper.currencyFormatter(totalIncome)}',
-                    style: TextStyle(
-                        color: ThemeColor.income,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold)),
-              ],
-            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 170,
@@ -644,7 +818,7 @@ Text(
                                       ? 'Income: ${Helper.currencyFormatter(income)}'
                                       : 'No income',
                                   child: Container(
-                                    width: 8,
+                                    width: 6,
                                     height: incomeHeight,
                                     decoration: BoxDecoration(
                                       color: ThemeColor.income,
@@ -658,7 +832,7 @@ Text(
                                       ? 'Expense: ${Helper.currencyFormatter(expense)}'
                                       : 'No expense',
                                   child: Container(
-                                    width: 8,
+                                    width: 6,
                                     height: expenseHeight,
                                     decoration: BoxDecoration(
                                       color: ThemeColor.expense,
@@ -682,8 +856,7 @@ Text(
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildMonthlyExpenseChart(List<TransactionModel> transactions) {
@@ -692,14 +865,14 @@ Text(
     if (!years.contains(DateTime.now().year)) {
       years.add(DateTime.now().year);
     }
-    if (!years.contains(_monthlyYear)) {
-      _monthlyYear = years.last;
+    if (!years.contains(_selectedYear)) {
+      _selectedYear = years.last;
     }
 
     final monthlyExpenses = List<double>.filled(12, 0);
     final monthlyIncome = List<double>.filled(12, 0);
     for (final tx in transactions) {
-      if (tx.createdAt.year == _monthlyYear) {
+      if (tx.createdAt.year == _selectedYear) {
         if (tx.isNewIncome) {
           monthlyIncome[tx.createdAt.month - 1] += tx.amount;
         } else {
@@ -715,11 +888,7 @@ Text(
     final totalIncome = monthlyIncome.fold<double>(
         0, (sum, v) => sum + v);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
+    return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,42 +896,25 @@ Text(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // const Text('MONTHLY INCOME & EXPENSES',
                 const Text('MONTHLY',
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                DropdownButton<int>(
-                  value: _monthlyYear,
-                  underline: const SizedBox(),
-                  items: years
-                      .map((y) => DropdownMenuItem(
-                            value: y,
-                            child: Text(y.toString()),
-                          ))
-                      .toList(),
-                  onChanged: (v) => setState(() => _monthlyYear = v!),
-                ),
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+              Row(
+                children: [
+                  Text(Helper.currencyFormatter(totalIncome, '+'),
+                      style: const TextStyle(
+                          color: ThemeColor.income,
+                          fontSize: 14)),
+                  const SizedBox(width: 12),
+                  Text(Helper.currencyFormatter(totalExpense, '-'),
+                      style: const TextStyle(
+                          color: ThemeColor.textSecondary,
+                          fontSize: 14)),
+                ],
+              ),
               ],
             ),
-            // const SizedBox(height: 4),
-            // Text(_monthlyYear.toString(),
-            //     style: const TextStyle(color: Colors.grey, fontSize: 12)),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                Text('Expense: ${Helper.currencyFormatter(totalExpense)}',
-                    style: TextStyle(
-                        color: ThemeColor.expense,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(width: 16),
-                Text('Income: ${Helper.currencyFormatter(totalIncome)}',
-                    style: TextStyle(
-                        color: ThemeColor.income,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold)),
-              ],
-            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 170,
@@ -792,7 +944,7 @@ Text(
                                     ? 'Income: ${Helper.currencyFormatter(income)}'
                                     : 'No income',
                                 child: Container(
-                                  width: 8,
+                                  width: 6,
                                   height: incomeHeight,
                                   decoration: BoxDecoration(
                                     color: ThemeColor.income,
@@ -806,7 +958,7 @@ Text(
                                     ? 'Expense: ${Helper.currencyFormatter(expense)}'
                                     : 'No expense',
                                 child: Container(
-                                  width: 8,
+                                  width: 6,
                                   height: expenseHeight,
                                   decoration: BoxDecoration(
                                     color: ThemeColor.expense,
@@ -829,7 +981,6 @@ Text(
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

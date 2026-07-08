@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:moneyrule/src/utils/theme_color.dart';
 import 'package:moneyrule/src/views/dashboard/index.dart';
 import 'package:moneyrule/src/views/login/index.dart';
 import 'package:moneyrule/src/views/new_expense_income/index.dart';
@@ -57,9 +58,9 @@ class MainApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: ThemeColor.background,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.black87,
+          backgroundColor: ThemeColor.background,
         ),
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,

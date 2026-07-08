@@ -25,16 +25,21 @@ class TransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tile = ListTile(
-      title: Text(title),
-      subtitle: Text(
-        '${isNewIncome ? 'Income' : 'Expense'} • ${subtitle ?? 'Unknown'}',
-        style: const TextStyle(color: Colors.grey, fontSize: 12),
+      title: Text(title, style: const TextStyle(color: ThemeColor.textPrimary),),
+      // subtitle: Text(
+      //   '${isNewIncome ? 'Income' : 'Expense'} • ${subtitle ?? 'Unknown'}',
+      //   style: const TextStyle(color: Colors.grey, fontSize: 12),
+      // ),
+       subtitle: Text(
+        subtitle ?? 'Unknown',
+        style: const TextStyle(color: ThemeColor.textSecondary, fontSize: 12),
       ),
       trailing: Text(
-        Helper.currencyFormatter(amount),
+        Helper.currencyFormatter(amount, isNewIncome ? '+' : '-'),
         style: TextStyle(
-          color: isNewIncome ? ThemeColor.income : ThemeColor.expense,
-          fontWeight: FontWeight.bold,
+          color: isNewIncome ? ThemeColor.income : ThemeColor.textSecondary,
+          // fontWeight: FontWeight.bold,
+          fontSize: 14
         ),
       ),
       onLongPress: onLongPress,
