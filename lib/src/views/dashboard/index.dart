@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:moneyrule/src/components/edit_transaction_sheet.dart';
 import 'package:moneyrule/src/components/transaction_item.dart';
+import 'package:moneyrule/src/models/user.dart';
 import 'package:moneyrule/src/services/auth.dart';
 import 'package:moneyrule/src/utils/theme_color.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -106,10 +107,35 @@ class _DashboardPageState extends State<DashboardPage> {
           final double incomeRatio = total == 0 ? 0.5 : balance / total;
           final double expenseRatio = total == 0 ? 0.5 : expenseTotal / total;
 
+          final userBox = Hive.box<User>('users');
+          User? currentUser;
+          try {
+            currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
+          } catch (e) {
+            currentUser = null;
+          }
+
           return Column(
             children: [
               // 💰 Overall Summary Card
-              Card(
+              
+
+              // 📊 Category Breakdown
+
+              Expanded(
+                child: ListView(
+                  children: [
+                    
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20), child: 
+                    Row(children: [
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Hello,', style: TextStyle(fontSize: 24, color: ThemeColor.text_secondary)),
+                      Text('${currentUser?.name ?? 'User'}!', style: TextStyle(fontSize: 24, color: ThemeColor.text_primary))
+                      // Row(children: [],)
+                    ])
+                    ],)),
+
+                    Card(
                   margin: const EdgeInsets.all(0),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -295,12 +321,6 @@ Text(
                      
                     ],
                   )),
-
-              // 📊 Category Breakdown
-
-              Expanded(
-                child: ListView(
-                  children: [
                     const SizedBox(
                       height: 38,
                     ),
