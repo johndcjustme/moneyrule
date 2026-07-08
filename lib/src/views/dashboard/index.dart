@@ -164,7 +164,7 @@ class _DashboardPageState extends State<DashboardPage> {
               .where((tx) => !tx.isNewIncome)
               .fold<double>(0, (sum, tx) => sum + tx.amount);
 
-          final balance = incomeTotal - expenseTotal;
+          final balance = incomeTotal == 0 ? 0.0 : incomeTotal - expenseTotal;
 
           final categoryBox = Hive.box<Category>('categories');
           final categories = categoryBox.values.toList();
@@ -445,7 +445,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                         Text(Helper.currencyFormatter(balance, '+'), style: const TextStyle(fontSize: 16, color: ThemeColor.income, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 14),
-                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(fontSize: 16, color: ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
+                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: TextStyle(fontSize: 16, color: balance == 0 && expenseTotal > 0 ? ThemeColor.danger : ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
                       ],),),
 
 
@@ -730,7 +730,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           const Text(
                             'RECENT',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: ThemeColor.textPrimary
                             ),
