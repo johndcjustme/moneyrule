@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:moneyrule/src/components/edit_transaction_sheet.dart';
 import 'package:moneyrule/src/components/transaction_item.dart';
 import 'package:moneyrule/src/services/excel_service.dart';
+import 'package:moneyrule/src/utils/theme_color.dart';
+import 'package:moneyrule/src/utils/theme_front.dart';
+import '../../helpers/helper.dart';
 import '../../models/category.dart';
 import '../../models/transaction_model.dart';
 
@@ -15,6 +19,38 @@ class AllTransactionsPage extends StatefulWidget {
 
 class _AllTransactionsPageState extends State<AllTransactionsPage> {
   DateTimeRange? _selectedRange;
+
+  DateTimeRange _todayRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return DateTimeRange(start: start, end: end);
+  }
+
+  DateTimeRange _yesterdayRange() {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(days: 1));
+    final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
+    final end = DateTime(
+        yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+    return DateTimeRange(start: start, end: end);
+  }
+
+  DateTimeRange _thisWeekRange() {
+    final now = DateTime.now();
+    final start = now.subtract(Duration(days: now.weekday - 1));
+    final weekStart =
+        DateTime(start.year, start.month, start.day);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return DateTimeRange(start: weekStart, end: end);
+  }
+
+  DateTimeRange _thisMonthRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return DateTimeRange(start: start, end: end);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +92,22 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                     _selectedRange = picked;
                   });
                 }
+              } else if (value == 'today') {
+                setState(() {
+                  _selectedRange = _todayRange();
+                });
+              } else if (value == 'yesterday') {
+                setState(() {
+                  _selectedRange = _yesterdayRange();
+                });
+              } else if (value == 'week') {
+                setState(() {
+                  _selectedRange = _thisWeekRange();
+                });
+              } else if (value == 'month') {
+                setState(() {
+                  _selectedRange = _thisMonthRange();
+                });
               } else if (value == 'clear') {
                 setState(() {
                   _selectedRange = null;
@@ -75,6 +127,34 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                 child: ListTile(
                   leading: Icon(Icons.upload),
                   title: Text('Import from Excel'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'today',
+                child: ListTile(
+                  leading: Icon(Icons.today),
+                  title: Text('Today'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'yesterday',
+                child: ListTile(
+                  leading: Icon(Icons.history),
+                  title: Text('Yesterday'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'week',
+                child: ListTile(
+                  leading: Icon(Icons.view_week),
+                  title: Text('This Week'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'month',
+                child: ListTile(
+                  leading: Icon(Icons.calendar_month),
+                  title: Text('This Month'),
                 ),
               ),
               const PopupMenuItem<String>(
@@ -105,10 +185,8 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
               ? allTx
               : allTx
                   .where((tx) =>
-                      tx.createdAt.isAfter(_selectedRange!.start
-                          .subtract(const Duration(days: 1))) &&
-                      tx.createdAt.isBefore(
-                          _selectedRange!.end.add(const Duration(days: 1))))
+                      !tx.createdAt.isBefore(_selectedRange!.start) &&
+                      !tx.createdAt.isAfter(_selectedRange!.end))
                   .toList();
 
           final incomeTotal = filteredTx
@@ -118,6 +196,21 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
           final expenseTotal = filteredTx
               .where((tx) => !tx.isNewIncome)
               .fold<double>(0, (sum, tx) => sum + tx.amount);
+
+          double totalForCategory(String name) {
+            return filteredTx
+                .where((tx) {
+                  final cat = catBox.get(tx.categoryId);
+                  return !tx.isNewIncome &&
+                      cat != null &&
+                      cat.name.toLowerCase() == name.toLowerCase();
+                })
+                .fold<double>(0, (sum, tx) => sum + tx.amount);
+          }
+
+          final needTotal = totalForCategory('Needs');
+          final wantsTotal = totalForCategory('Wants');
+          final savingsTotal = totalForCategory('Save');
 
           if (filteredTx.isEmpty) {
             return const Center(child: Text('No transactions recorded.'));
@@ -133,15 +226,41 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Showing: ${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}',
+                        'Showing: ${DateFormat('MMM d, y').format(_selectedRange!.start)} → ${DateFormat('MMM d, y').format(_selectedRange!.end)}',
                         style:
                             const TextStyle(fontSize: 14, color: Colors.grey),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                          '💰 Total Income: ₱${incomeTotal.toStringAsFixed(2)}'),
-                      Text(
-                          '💸 Total Deductions: ₱${expenseTotal.toStringAsFixed(2)}'),
+                      const SizedBox(height: 16),
+                       Row(children: [
+                        const Text('Income: ', style: TextStyle(color: ThemeColor.textPrimary)),
+                        Text(Helper.currencyFormatter(incomeTotal, '+'), style: const TextStyle(color: ThemeColor.income, fontWeight: FontWeight.bold)),
+                      ],),
+                        Row(children: [
+                          const Text('Deductions: ', style: TextStyle(color: ThemeColor.textPrimary)),
+                          Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
+                        ],),
+
+                        Padding(padding: const EdgeInsets.only(left: 16), child: Column(children: [
+                        Row(children: [
+                          const Text('Needs: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                          Text(Helper.currencyFormatter(needTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
+                        ],),
+                        Row(children: [
+                          const Text('Wants: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                          Text(Helper.currencyFormatter(wantsTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
+                        ],),
+                        Row(children: [
+                          const Text('Savings: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                          Text(Helper.currencyFormatter(savingsTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
+                        ],)])),
+                      const SizedBox(height: 16),
+             
+                       
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      const Text('TRANSACTIONS', style: TextStyle(fontSize: ThemeFont.bodyLarge, fontWeight: FontWeight.bold)),
+                      // Text(
+                      //     '🧮 Overall Total: ${Helper.currencyFormatter(incomeTotal - expenseTotal, (incomeTotal - expenseTotal) >= 0 ? '+' : '')}'),
                     ],
                   ),
                 ),
