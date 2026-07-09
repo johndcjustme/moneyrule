@@ -376,9 +376,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                                   ? Helper.currencyFormatter(
                                                       balance)
                                                   : '••••••',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: ThemeFont.headlineSmall,
-                                                color: ThemeColor.income
+                                                color: balance < 0 ? ThemeColor.danger : ThemeColor.income
                                                 // fontWeight: FontWeight.bold
                                               ),
                                             )
@@ -576,6 +576,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     const SizedBox(
                       height: 27,
                     ),
+
                     ...categories.map((cat) {
                       final catId = cat.key as int;
                       final incomeForCat = transactions
@@ -590,13 +591,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       final double totalIncome = balanceForCat + expenseForCat;
 
                       return ListTile(
-                        // contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        // leading: const Icon(
-                        //   Icons.star,
-                        //   // color: Colors.grey, // Customize as needed
-                        //   size: 20,
-                        // ),
-
                         trailing: SizedBox(
                           width: 175, // ⬅️ Increased width for better layout
                           child: Row(
@@ -657,24 +651,76 @@ class _DashboardPageState extends State<DashboardPage> {
                         subtitle: Text(
                             Helper.currencyFormatter(totalIncome),
                             style: const TextStyle(
-                                color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
-                        // subtitle: Column(
-                        //   crossAxisAlignment: CrossAxisAlignment.start,
-                        //   // mainAxisSize: MainAxisSize.min,
-                        //   children: <Widget>[
-                        //     // Text(
-                        //     //   'Income: ₱${incomeForCat.toStringAsFixed(2)}\n',
-                        //     //   style: const TextStyle(
-                        //     //     color: Colors.blue,
-                        //     //     height:
-                        //     //         0.7, // 👈 controls line spacing (default is ~1.5)
-                        //     //   ),
-                        //     // ),
-                        //     const SizedBox(height: 4),
-                        //   ],
-                        // ),
+                                color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall))
                       );
                     }),
+
+
+ListTile(
+                        trailing: SizedBox(
+                          width: 175, // ⬅️ Increased width for better layout
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      Helper.currencyFormatter(expenseTotal, '-'),
+                                      style: const TextStyle(
+                                        color: ThemeColor.textSecondary,
+                                        fontSize: ThemeFont.bodySmall,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                    Text(
+                                      Helper.currencyFormatter(balance, balance >= 0 ? '+' : ''),
+                                      style: TextStyle(
+                                        color: balance >= 0
+                                            ? ThemeColor.income
+                                            : ThemeColor.danger,
+                                        fontSize: ThemeFont.bodySmall,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                  width:
+                                      8), // ⬅️ spacing between text and chart
+                              PieChart(
+                                dataMap: {
+                                  "Remaining":
+                                      balance < 0 ? 0 : balance,
+                                  "Expenses": expenseTotal,
+                                },
+                                colorList: const [
+                                  ThemeColor.income,
+                                  ThemeColor.textSecondary
+                                ],
+                                chartType: ChartType.ring,
+                                chartRadius: 30,
+                                ringStrokeWidth: 4,
+                                legendOptions:
+                                    const LegendOptions(showLegends: false),
+                                chartValuesOptions: const ChartValuesOptions(
+                                    showChartValues: false),
+                              ),
+                            ],
+                          ),
+                        ),
+                        title: const Text('All', style: TextStyle(fontSize: ThemeFont.bodyMedium, fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            Helper.currencyFormatter(balance + expenseTotal),
+                            style: const TextStyle(
+                                color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall))
+                      ),
+
+
                      const SizedBox(
                        height: 32,
                      ),
