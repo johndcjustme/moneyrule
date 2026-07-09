@@ -59,7 +59,7 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Transactions'),
+        title: const Text('Transactions'),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) async {

@@ -430,7 +430,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
                         child: LinearProgressIndicator(
                           value: total == 0 ? 0 : incomeRatio,
-                          backgroundColor: ThemeColor.textTertiary,
+                          backgroundColor: ThemeColor.expense,
                           valueColor: const AlwaysStoppedAnimation<Color>(ThemeColor.income),
                           minHeight: 6.0,
                           borderRadius: const BorderRadius.all(Radius.circular(4)),
@@ -634,7 +634,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 },
                                 colorList: const [
                                   ThemeColor.income,
-                                  ThemeColor.textSecondary
+                                  ThemeColor.expense
                                 ],
                                 chartType: ChartType.ring,
                                 chartRadius: 30,
@@ -700,7 +700,7 @@ ListTile(
                                 },
                                 colorList: const [
                                   ThemeColor.income,
-                                  ThemeColor.textSecondary
+                                  ThemeColor.expense
                                 ],
                                 chartType: ChartType.ring,
                                 chartRadius: 30,
@@ -836,14 +836,13 @@ ListTile(
                         ),
                       ),
                       // const SizedBox(height: 4),
-                      Padding(padding: const EdgeInsets.all(16), child: Card(color: const Color.fromARGB(144, 28, 28, 28), 
-                      child: Padding(padding: const EdgeInsets.all(16), child: Text(
+                      Padding(padding: const EdgeInsets.all(16), child: Text(
                         _notesController.text.isEmpty ? 'No notes' : _notesController.text,
                         style: const TextStyle(
                           color: ThemeColor.textSecondary,
                           fontSize: ThemeFont.bodyMedium,
                         ),
-                      ))))
+                      ))
                     ],
                   ),
                 ),
