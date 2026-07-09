@@ -1018,9 +1018,9 @@ ListTile(
                                     Container(
                                       width: 14,
                                       height: incomeHeight,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: ThemeColor.income,
-                                        borderRadius: const BorderRadius.vertical(
+                                        borderRadius: BorderRadius.vertical(
                                             top: Radius.circular(2)),
                                       ),
                                     ),
@@ -1043,9 +1043,9 @@ ListTile(
                                   Container(
                                     width: 14,
                                     height: needsHeight,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: ThemeColor.textTertiary,
-                                      borderRadius: const BorderRadius.vertical(
+                                      borderRadius: BorderRadius.vertical(
                                           bottom: Radius.circular(2)),
                                     ),
                                   ),
@@ -1184,9 +1184,9 @@ ListTile(
                                   Container(
                                     width: 16,
                                     height: incomeHeight,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: ThemeColor.income,
-                                      borderRadius: const BorderRadius.vertical(
+                                      borderRadius: BorderRadius.vertical(
                                           top: Radius.circular(2)),
                                     ),
                                   ),
@@ -1209,9 +1209,9 @@ ListTile(
                                 Container(
                                   width: 16,
                                   height: needsHeight,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: ThemeColor.textTertiary,
-                                    borderRadius: const BorderRadius.vertical(
+                                    borderRadius: BorderRadius.vertical(
                                         bottom: Radius.circular(2)),
                                   ),
                                 ),
