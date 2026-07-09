@@ -224,7 +224,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ]),
                       const SizedBox(height: 65),
                       const Text('Hello,', style: TextStyle(fontSize: ThemeFont.headlineMedium, color: ThemeColor.textSecondary)),
-                      Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: ThemeFont.headlineMedium, color: ThemeColor.textPrimary))
+                      Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: ThemeFont.headlineMedium))
                       // Row(children: [],)
                     ]),
 
@@ -305,7 +305,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                                                   style: TextStyle(
                                                                       color: ThemeColor.textSecondary)),
                                                               Text(Helper.currencyFormatter(
-                                                                  todayExpenseTotal, '-'), style: const TextStyle(color: ThemeColor.textPrimary, fontWeight: FontWeight.bold))
+                                                                  todayExpenseTotal, '-'), style: const TextStyle(fontWeight: FontWeight.bold))
                                                             ],
                                                           )
                                                         ],
@@ -437,7 +437,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
                       // Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      //   Text(Helper.currencyFormatter(incomeTotal), style: const TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.textPrimary)),
+                      //   Text(Helper.currencyFormatter(incomeTotal), style: const TextStyle(fontSize: ThemeFont.bodySmall)),
                       //   // const SizedBox(width: 14),
                       //   // Text(Helper.currencyFormatter(expenseTotal, '-'), style: TextStyle(fontSize: 16, color: balance == 0 && expenseTotal > 0 ? ThemeColor.danger : ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
                       // ],),),
@@ -640,7 +640,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 },
                                 colorList: const [
                                   ThemeColor.income,
-                                  ThemeColor.expense
+                                  ThemeColor.textSecondary
                                 ],
                                 chartType: ChartType.ring,
                                 chartRadius: 30,
@@ -725,15 +725,14 @@ class _DashboardPageState extends State<DashboardPage> {
                             'RECENT',
                             style: TextStyle(
                               fontSize: ThemeFont.titleMedium,
-                              fontWeight: FontWeight.bold,
-                              color: ThemeColor.textPrimary
+                              fontWeight: FontWeight.bold
                             ),
                           ),
                           IconButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/transactions');
                             },
-                            icon: const Icon(Icons.chevron_right, color: ThemeColor.textPrimary,),
+                            icon: const Icon(Icons.chevron_right),
                           ),
                           // TextButton(
                           //   onPressed: () {
@@ -782,10 +781,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('NOTES', style: TextStyle(fontSize: ThemeFont.titleMedium, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+                            const Text('NOTES', style: TextStyle(fontSize: ThemeFont.titleMedium, fontWeight: FontWeight.bold)),
                             IconButton(
                               onPressed: _showNotesDialog,
-                              icon: const Icon(Icons.edit, size: 18, color: ThemeColor.textPrimary,),
+                              icon: const Icon(Icons.edit, size: 18),
                             ),
                           ],
                         ),

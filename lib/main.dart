@@ -50,7 +50,7 @@ class MainApp extends StatelessWidget {
       title: 'Finance Tracker',
       initialRoute: '/',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system, // 🌗 This respects system dark/light mode
+      themeMode: ThemeMode.dark,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
