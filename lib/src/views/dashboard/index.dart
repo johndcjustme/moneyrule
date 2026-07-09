@@ -230,54 +230,61 @@ class _DashboardPageState extends State<DashboardPage> {
                       // Row(children: [],)
                     ]),
 
-                     PopupMenuButton<String>(
-            icon: const CircleAvatar(
-              radius: 18,
-              backgroundColor: ThemeColor.expense,
-              child: Icon(Icons.person, size: 20, color: ThemeColor.textSecondary),
-            ),
-            onSelected: (value) {
-              if (value == 'account') {
-                Navigator.pushNamed(context, '/account');
-              } else if (value == 'logout') {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Logout'),
-                    content: const Text('Are you sure you want to logout?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await Auth.logout(context);
+                    Row(children: [
+
+                      IconButton(onPressed: () {
+                        _showNotesDialog();
+                      }, icon: const Icon(Icons.edit), color: ThemeColor.textSecondary,),
+                      const SizedBox(width: 6),
+                      PopupMenuButton<String>(
+                        icon: const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: ThemeColor.expense,
+                          child: Icon(Icons.person, size: 20, color: ThemeColor.textSecondary),
+                        ),
+                        onSelected: (value) {
+                          if (value == 'account') {
+                            Navigator.pushNamed(context, '/account');
+                          } else if (value == 'logout') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Logout'),
+                                content: const Text('Are you sure you want to logout?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      await Auth.logout(context);
+                                    },
+                                    child: const Text('Logout'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                         },
-                        child: const Text('Logout'),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'account',
+                            child: ListTile(
+                              leading: Icon(Icons.account_circle),
+                              title: Text('Account Settings'),
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'logout',
+                            child: ListTile(
+                              leading: Icon(Icons.logout),
+                              title: Text('Logout'),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'account',
-                child: ListTile(
-                  leading: Icon(Icons.account_circle),
-                  title: Text('Account Settings'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Logout'),
-                ),
-              ),
-            ],
-          ),
+                    ],)
                     
                     ],)),
 
