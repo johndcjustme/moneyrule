@@ -228,8 +228,10 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                       Text(
                         'Showing: ${DateFormat('MMM d, y').format(_selectedRange!.start)} → ${DateFormat('MMM d, y').format(_selectedRange!.end)}',
                         style:
-                            const TextStyle(fontSize: 14, color: Colors.grey),
+                            const TextStyle(fontSize: 14, color: ThemeColor.textPrimary),
                       ),
+                      const SizedBox(height: 16),
+                      Text('Total Transactions: ${filteredTx.length}', style: TextStyle(color: ThemeColor.textSecondary)),
                       const SizedBox(height: 16),
                        Row(children: [
                         const Text('Income: ', style: TextStyle(color: ThemeColor.textPrimary)),
