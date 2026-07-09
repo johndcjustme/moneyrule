@@ -8,4 +8,7 @@ class ThemeColor {
   static const Color textSecondary = Color(0xFF717171);
   static const Color textTertiary = Color(0xFF555555);
   static const Color danger = Color(0xFFEE1115);
+  static const Color primary = Color(0xFF4D9DE0);
+  static const Color secondary = Color(0xFFF4A259);
+  static const Color tertiary = Color(0xFF9067C6);
 }

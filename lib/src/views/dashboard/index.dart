@@ -878,6 +878,11 @@ ListTile(
     );
   }
 
+  String? _categoryName(TransactionModel tx) {
+    final catBox = Hive.box<Category>('categories');
+    return catBox.get(tx.categoryId)?.name.toLowerCase();
+  }
+
   Widget _buildDailyExpenseChart(List<TransactionModel> transactions) {
     final years = transactions.map((t) => t.createdAt.year).toSet().toList()
       ..sort();
@@ -890,53 +895,99 @@ ListTile(
 
     final daysInMonth =
         DateUtils.getDaysInMonth(_selectedYear, _selectedMonth);
-    final dailyExpenses = List<double>.filled(daysInMonth, 0);
     final dailyIncome = List<double>.filled(daysInMonth, 0);
+    final dailyNeeds = List<double>.filled(daysInMonth, 0);
+    final dailyWants = List<double>.filled(daysInMonth, 0);
+    final dailySavings = List<double>.filled(daysInMonth, 0);
     for (final tx in transactions) {
       if (tx.createdAt.year == _selectedYear &&
           tx.createdAt.month == _selectedMonth) {
         if (tx.isNewIncome) {
           dailyIncome[tx.createdAt.day - 1] += tx.amount;
-        } else {
-          dailyExpenses[tx.createdAt.day - 1] += tx.amount;
+          continue;
+        }
+        final name = _categoryName(tx);
+        if (name == 'needs') {
+          dailyNeeds[tx.createdAt.day - 1] += tx.amount;
+        } else if (name == 'wants') {
+          dailyWants[tx.createdAt.day - 1] += tx.amount;
+        } else if (name == 'save') {
+          dailySavings[tx.createdAt.day - 1] += tx.amount;
         }
       }
     }
-    final maxExpense = dailyExpenses.reduce(max);
-    final maxIncome = dailyIncome.reduce(max);
-    final maxValue = max(maxExpense, maxIncome);
-    final totalExpense = dailyExpenses.fold<double>(
-        0, (sum, v) => sum + v);
-    final totalIncome = dailyIncome.fold<double>(
-        0, (sum, v) => sum + v);
+    final totalIncome = dailyIncome.fold<double>(0, (s, v) => s + v);
+    final totalNeeds = dailyNeeds.fold<double>(0, (s, v) => s + v);
+    final totalWants = dailyWants.fold<double>(0, (s, v) => s + v);
+    final totalSavings = dailySavings.fold<double>(0, (s, v) => s + v);
+
+    final maxExpense = List.generate(daysInMonth,
+        (i) => dailyNeeds[i] + dailyWants[i] + dailySavings[i]).reduce(max);
+    final maxValue = max(maxExpense, dailyIncome.reduce(max));
 
     return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Daily',
+            Center(child: const Text('JUL 2026',
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
-            Row(
-              children: [
-                Text(Helper.currencyFormatter(totalIncome, '+'),
-                    style: const TextStyle(
-                        color: ThemeColor.income,
-                        fontSize: ThemeFont.bodyMedium)),
-                const SizedBox(width: 12),
-                Text(Helper.currencyFormatter(totalExpense, '-'),
-                    style: const TextStyle(
-                        color: ThemeColor.textSecondary,
-                        fontSize: ThemeFont.bodyMedium)),
-              ],
-            ),
-              ],
-            ),
-            // const SizedBox(height: 4),
+                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),),
+
+            const SizedBox(height: 10),
+
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Income',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                    Text(Helper.currencyFormatter(totalIncome, '+'),
+                        style: const TextStyle(
+                            color: ThemeColor.income,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Needs',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                      Text(Helper.currencyFormatter(totalNeeds, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textPrimary,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Wants',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                      Text(Helper.currencyFormatter(totalWants, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodyMedium)),
+                 
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Save',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                      Text(Helper.currencyFormatter(totalSavings, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textTertiary,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+            ],),
+
             const SizedBox(height: 16),
             SizedBox(
               height: 170,
@@ -945,14 +996,22 @@ ListTile(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: List.generate(daysInMonth, (i) {
-                    final expense = dailyExpenses[i];
                     final income = dailyIncome[i];
-                    final expenseHeight = maxValue == 0
-                        ? 0.0
-                        : (expense / maxValue) * 110;
+                    final needs = dailyNeeds[i];
+                    final wants = dailyWants[i];
+                    final savings = dailySavings[i];
                     final incomeHeight = maxValue == 0
                         ? 0.0
                         : (income / maxValue) * 110;
+                    final needsHeight = maxValue == 0
+                        ? 0.0
+                        : (needs / maxValue) * 110;
+                    final wantsHeight = maxValue == 0
+                        ? 0.0
+                        : (wants / maxValue) * 110;
+                    final savingsHeight = maxValue == 0
+                        ? 0.0
+                        : (savings / maxValue) * 110;
                     return SizedBox(
                       width: 24,
                       child: Padding(
@@ -960,38 +1019,42 @@ ListTile(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Tooltip(
-                                  message: income > 0
-                                      ? 'Income: ${Helper.currencyFormatter(income)}'
-                                      : 'No income',
-                                  child: Container(
-                                    width: 6,
+                            Tooltip(
+                              message:
+                                  'Income: ${Helper.currencyFormatter(income, '+')}\nNeeds: ${Helper.currencyFormatter(needs, '-')}\nWants: ${Helper.currencyFormatter(wants, '-')}\nSavings: ${Helper.currencyFormatter(savings, '-')}',
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    width: 14,
                                     height: incomeHeight,
                                     decoration: BoxDecoration(
                                       color: ThemeColor.income,
-                                      borderRadius: BorderRadius.circular(2),
+                                      borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(2)),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 2),
-                                Tooltip(
-                                  message: expense > 0
-                                      ? 'Expense: ${Helper.currencyFormatter(expense)}'
-                                      : 'No expense',
-                                  child: Container(
-                                    width: 6,
-                                    height: expenseHeight,
+                                  Container(
+                                    width: 14,
+                                    height: savingsHeight,
+                                    color: ThemeColor.textPrimary,
+                                  ),
+                                  Container(
+                                    width: 14,
+                                    height: wantsHeight,
+                                    color: ThemeColor.textSecondary,
+                                  ),
+                                  Container(
+                                    width: 14,
+                                    height: needsHeight,
                                     decoration: BoxDecoration(
-                                      color: ThemeColor.expense,
-                                      borderRadius: BorderRadius.circular(2),
+                                      color: ThemeColor.textTertiary,
+                                      borderRadius: const BorderRadius.vertical(
+                                          bottom: Radius.circular(2)),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text('${i + 1}',
@@ -1020,104 +1083,164 @@ ListTile(
       _selectedYear = years.last;
     }
 
-    final monthlyExpenses = List<double>.filled(12, 0);
     final monthlyIncome = List<double>.filled(12, 0);
+    final monthlyNeeds = List<double>.filled(12, 0);
+    final monthlyWants = List<double>.filled(12, 0);
+    final monthlySavings = List<double>.filled(12, 0);
     for (final tx in transactions) {
       if (tx.createdAt.year == _selectedYear) {
         if (tx.isNewIncome) {
           monthlyIncome[tx.createdAt.month - 1] += tx.amount;
-        } else {
-          monthlyExpenses[tx.createdAt.month - 1] += tx.amount;
+          continue;
+        }
+        final name = _categoryName(tx);
+        if (name == 'needs') {
+          monthlyNeeds[tx.createdAt.month - 1] += tx.amount;
+        } else if (name == 'wants') {
+          monthlyWants[tx.createdAt.month - 1] += tx.amount;
+        } else if (name == 'save') {
+          monthlySavings[tx.createdAt.month - 1] += tx.amount;
         }
       }
     }
-    final maxExpense = monthlyExpenses.reduce(max);
-    final maxIncome = monthlyIncome.reduce(max);
-    final maxValue = max(maxExpense, maxIncome);
-    final totalExpense = monthlyExpenses.fold<double>(
-        0, (sum, v) => sum + v);
-    final totalIncome = monthlyIncome.fold<double>(
-        0, (sum, v) => sum + v);
+    final totalIncome = monthlyIncome.fold<double>(0, (s, v) => s + v);
+    final totalNeeds = monthlyNeeds.fold<double>(0, (s, v) => s + v);
+    final totalWants = monthlyWants.fold<double>(0, (s, v) => s + v);
+    final totalSavings = monthlySavings.fold<double>(0, (s, v) => s + v);
+
+    final maxExpense = List.generate(12,
+        (i) => monthlyNeeds[i] + monthlyWants[i] + monthlySavings[i]).reduce(max);
+    final maxValue = max(maxExpense, monthlyIncome.reduce(max));
 
     return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Monthly',
+            Center(
+              child: const Text('YEAR 2026',
                     style:
                         TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
-              Row(
-                children: [
-                  Text(Helper.currencyFormatter(totalIncome, '+'),
-                      style: const TextStyle(
-                          color: ThemeColor.income,
-                          fontSize: ThemeFont.bodyMedium)),
-                  const SizedBox(width: 12),
-                  Text(Helper.currencyFormatter(totalExpense, '-'),
-                      style: const TextStyle(
-                          color: ThemeColor.textSecondary,
-                          fontSize: ThemeFont.bodyMedium)),
-                ],
-              ),
-              ],
             ),
-            const SizedBox(height: 4),
+
+            const SizedBox(height: 10),
+
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Income',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                  Text(Helper.currencyFormatter(totalIncome, '+'),
+                        style: const TextStyle(
+                            color: ThemeColor.income,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Needs',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                   Text(Helper.currencyFormatter(totalNeeds, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textPrimary,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Wants',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                    Text(Helper.currencyFormatter(totalWants, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                 const Text('Save',
+                        style: TextStyle(
+                            color: ThemeColor.textSecondary,
+                            fontSize: ThemeFont.bodySmall)),
+                Text(Helper.currencyFormatter(totalSavings, '-'),
+                        style: const TextStyle(
+                            color: ThemeColor.textTertiary,
+                            fontSize: ThemeFont.bodyMedium)),
+              ],),
+            ],),
+
+            
             const SizedBox(height: 16),
             SizedBox(
               height: 170,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(12, (i) {
-                  final expense = monthlyExpenses[i];
                   final income = monthlyIncome[i];
-                  final expenseHeight = maxValue == 0
-                      ? 0.0
-                      : (expense / maxValue) * 110;
+                  final needs = monthlyNeeds[i];
+                  final wants = monthlyWants[i];
+                  final savings = monthlySavings[i];
                   final incomeHeight = maxValue == 0
                       ? 0.0
                       : (income / maxValue) * 110;
+                  final needsHeight = maxValue == 0
+                      ? 0.0
+                      : (needs / maxValue) * 110;
+                  final wantsHeight = maxValue == 0
+                      ? 0.0
+                      : (wants / maxValue) * 110;
+                  final savingsHeight = maxValue == 0
+                      ? 0.0
+                      : (savings / maxValue) * 110;
                   return Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Tooltip(
-                                message: income > 0
-                                    ? 'Income: ${Helper.currencyFormatter(income)}'
-                                    : 'No income',
-                                child: Container(
-                                  width: 6,
+                          Tooltip(
+                            message:
+                                'Income: ${Helper.currencyFormatter(income, '+')}\nNeeds: ${Helper.currencyFormatter(needs, '-')}\nWants: ${Helper.currencyFormatter(wants, '-')}\nSavings: ${Helper.currencyFormatter(savings, '-')}',
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  width: 16,
                                   height: incomeHeight,
                                   decoration: BoxDecoration(
                                     color: ThemeColor.income,
-                                    borderRadius: BorderRadius.circular(2),
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(2)),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 2),
-                              Tooltip(
-                                message: expense > 0
-                                    ? 'Expense: ${Helper.currencyFormatter(expense)}'
-                                    : 'No expense',
-                                child: Container(
-                                  width: 6,
-                                  height: expenseHeight,
+                                Container(
+                                  width: 16,
+                                  height: savingsHeight,
+                                  color: ThemeColor.textPrimary,
+                                ),
+                                Container(
+                                  width: 16,
+                                  height: wantsHeight,
+                                  color: ThemeColor.textSecondary,
+                                ),
+                                Container(
+                                  width: 16,
+                                  height: needsHeight,
                                   decoration: BoxDecoration(
-                                    color: ThemeColor.expense,
-                                    borderRadius: BorderRadius.circular(2),
+                                    color: ThemeColor.textTertiary,
+                                    borderRadius: const BorderRadius.vertical(
+                                        bottom: Radius.circular(2)),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(DateFormat('MMM').format(DateTime(2024, i + 1)),
