@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moneyrule/src/helpers/helper.dart';
 import 'package:moneyrule/src/utils/theme_color.dart';
+import 'package:moneyrule/src/utils/theme_front.dart';
 
 class TransactionItem extends StatelessWidget {
   final String title;
@@ -25,21 +26,21 @@ class TransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tile = ListTile(
-      title: Text(title, style: const TextStyle(color: ThemeColor.textPrimary),),
+      title: Text(title, style: const TextStyle(color: ThemeColor.textPrimary, fontSize: ThemeFont.bodyMedium, fontWeight: FontWeight.bold)),
       // subtitle: Text(
       //   '${isNewIncome ? 'Income' : 'Expense'} • ${subtitle ?? 'Unknown'}',
       //   style: const TextStyle(color: Colors.grey, fontSize: 12),
       // ),
        subtitle: Text(
         subtitle ?? 'Unknown',
-        style: const TextStyle(color: ThemeColor.textSecondary, fontSize: 12),
+        style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall),
       ),
       trailing: Text(
         Helper.currencyFormatter(amount, isNewIncome ? '+' : '-'),
         style: TextStyle(
           color: isNewIncome ? ThemeColor.income : ThemeColor.textSecondary,
           // fontWeight: FontWeight.bold,
-          fontSize: 14
+          fontSize: ThemeFont.bodyMedium
         ),
       ),
       onLongPress: onLongPress,

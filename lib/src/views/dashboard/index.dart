@@ -8,6 +8,7 @@ import 'package:moneyrule/src/components/transaction_item.dart';
 import 'package:moneyrule/src/models/user.dart';
 import 'package:moneyrule/src/services/auth.dart';
 import 'package:moneyrule/src/utils/theme_color.dart';
+import 'package:moneyrule/src/utils/theme_front.dart';
 import 'package:pie_chart/pie_chart.dart';
 import '../../helpers/helper.dart';
 import '../../models/category.dart';
@@ -218,12 +219,12 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       const Row(children: [
-                        Text('Split', style: TextStyle(fontSize: 14, color: ThemeColor.textTertiary)),
-                        Text('Wise', style: TextStyle(fontSize: 14, color: ThemeColor.income)),
+                        Text('Split', style: TextStyle(color: ThemeColor.textTertiary)),
+                        Text('Wise', style: TextStyle(color: ThemeColor.income)),
                       ]),
                       const SizedBox(height: 65),
-                      const Text('Hello,', style: TextStyle(fontSize: 28, color: ThemeColor.textSecondary)),
-                      Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: 28, color: ThemeColor.textPrimary))
+                      const Text('Hello,', style: TextStyle(fontSize: ThemeFont.headlineMedium, color: ThemeColor.textSecondary)),
+                      Text('${currentUser?.name ?? 'User'}!', style: const TextStyle(fontSize: ThemeFont.headlineMedium, color: ThemeColor.textPrimary))
                       // Row(children: [],)
                     ]),
 
@@ -295,16 +296,16 @@ class _DashboardPageState extends State<DashboardPage> {
                                                   child: Row(
                                                     children: [
                                                       Padding(
-                                                        padding: EdgeInsets.only(right: 24),
+                                                        padding: const EdgeInsets.only(right: 24),
                                                         child: Column(
                                                           children: [
                                                             Row(
                                                               children: [
                                                               const Text('TODAY: ',
                                                                   style: TextStyle(
-                                                                      color: ThemeColor.textSecondary, fontSize: 14)),
+                                                                      color: ThemeColor.textSecondary)),
                                                               Text(Helper.currencyFormatter(
-                                                                  todayExpenseTotal, '-'), style: const TextStyle(color: ThemeColor.textPrimary, fontSize: 14, fontWeight: FontWeight.bold))
+                                                                  todayExpenseTotal, '-'), style: const TextStyle(color: ThemeColor.textPrimary, fontWeight: FontWeight.bold))
                                                             ],
                                                           )
                                                         ],
@@ -320,7 +321,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                                             const EdgeInsets.only(right: 16),
                                                         child: Text(name,
                                                             style: const TextStyle(
-                                                                color: ThemeColor.textTertiary, fontSize: 12)),
+                                                                color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
                                                       );
                                                     }),
                                                     Padding(
@@ -360,37 +361,30 @@ class _DashboardPageState extends State<DashboardPage> {
                                           // const SizedBox(
                                           //   width: 10,
                                           // ),
-                                          Row(children: [
-                                            Text(
-                                              _showIncome
-                                                  ? Helper.currencyFormatter(
-                                                      incomeTotal)
-                                                  : '••••••',
-                                              style: const TextStyle(
-                                                fontSize: 26,
-                                                // fontWeight: FontWeight.bold
-                                              ),
-                                            ),
-                                            // const SizedBox(
-                                            //   width: 4,
-                                            // ),
-                                            IconButton(
-                                              icon: Icon(
-                                                _showIncome
-                                                    ? Icons.visibility_off
-                                                    : Icons.visibility,
-                                                color: Colors.grey,
-                                                size: 18,
-                                              ),
-                                              padding: EdgeInsets.zero,
-                                              constraints:
-                                                  const BoxConstraints(),
-                                              onPressed: () {
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                            GestureDetector(
+                                              onTap: () {
                                                 setState(() {
                                                   _showIncome = !_showIncome;
                                                 });
                                               },
+                                              child: Text(
+                                              _showIncome
+                                                  ? Helper.currencyFormatter(
+                                                      balance)
+                                                  : '••••••',
+                                              style: const TextStyle(
+                                                fontSize: ThemeFont.headlineSmall,
+                                                color: ThemeColor.income
+                                                // fontWeight: FontWeight.bold
+                                              ),
                                             )
+                                            ),
+                                            Text(Helper.currencyFormatter(expenseTotal, '-'), style: TextStyle(fontSize: 16, color: balance == 0 && expenseTotal > 0 ? ThemeColor.danger : ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
+
                                           ])
                                         ],
                                           )),
@@ -442,11 +436,11 @@ class _DashboardPageState extends State<DashboardPage> {
                           borderRadius: const BorderRadius.all(Radius.circular(4)),
                         ),
                       ),
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                        Text(Helper.currencyFormatter(balance, '+'), style: const TextStyle(fontSize: 16, color: ThemeColor.income, fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 14),
-                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: TextStyle(fontSize: 16, color: balance == 0 && expenseTotal > 0 ? ThemeColor.danger : ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
-                      ],),),
+                      // Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      //   Text(Helper.currencyFormatter(incomeTotal), style: const TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.textPrimary)),
+                      //   // const SizedBox(width: 14),
+                      //   // Text(Helper.currencyFormatter(expenseTotal, '-'), style: TextStyle(fontSize: 16, color: balance == 0 && expenseTotal > 0 ? ThemeColor.danger : ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
+                      // ],),),
 
 
                   // SizedBox(height: 20,),
@@ -604,7 +598,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         // ),
 
                         trailing: SizedBox(
-                          width: 200, // ⬅️ Increased width for better layout
+                          width: 175, // ⬅️ Increased width for better layout
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -618,7 +612,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       Helper.currencyFormatter(expenseForCat, '-'),
                                       style: const TextStyle(
                                         color: ThemeColor.textSecondary,
-                                        fontSize: 14,
+                                        fontSize: ThemeFont.bodySmall,
                                         height: 1.2,
                                       ),
                                     ),
@@ -628,7 +622,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         color: balanceForCat >= 0
                                             ? ThemeColor.income
                                             : ThemeColor.danger,
-                                        fontSize: 14,
+                                        fontSize: ThemeFont.bodySmall,
                                         height: 1.2,
                                       ),
                                     ),
@@ -659,11 +653,11 @@ class _DashboardPageState extends State<DashboardPage> {
                             ],
                           ),
                         ),
-                        title: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(cat.name, style: const TextStyle(fontSize: ThemeFont.bodyMedium, fontWeight: FontWeight.bold)),
                         subtitle: Text(
                             Helper.currencyFormatter(totalIncome),
                             style: const TextStyle(
-                                color: ThemeColor.textSecondary)),
+                                color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
                         // subtitle: Column(
                         //   crossAxisAlignment: CrossAxisAlignment.start,
                         //   // mainAxisSize: MainAxisSize.min,
@@ -695,7 +689,7 @@ class _DashboardPageState extends State<DashboardPage> {
                              items: List.generate(12, (i) => i + 1)
                                  .map((m) => DropdownMenuItem(
                                        value: m,
-                                       child: Text(DateFormat('MMM').format(DateTime(2024, m))),
+                                       child: Text(DateFormat('MMM').format(DateTime(2024, m)).toUpperCase()),
                                      ))
                                  .toList(),
                              onChanged: (v) => setState(() => _selectedMonth = v!),
@@ -730,25 +724,31 @@ class _DashboardPageState extends State<DashboardPage> {
                           const Text(
                             'RECENT',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: ThemeFont.titleMedium,
                               fontWeight: FontWeight.bold,
                               color: ThemeColor.textPrimary
                             ),
                           ),
-                          TextButton(
+                          IconButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/transactions');
                             },
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('More', style: TextStyle(color: ThemeColor.textPrimary)),
-                                SizedBox(width: 4),
-                                Icon(Icons.chevron_right,
-                                    size: 14, color: ThemeColor.textPrimary,),
-                              ],
-                            ),
+                            icon: const Icon(Icons.chevron_right, color: ThemeColor.textPrimary,),
                           ),
+                          // TextButton(
+                          //   onPressed: () {
+                          //     Navigator.pushNamed(context, '/transactions');
+                          //   },
+                          //   child: const Row(
+                          //     mainAxisSize: MainAxisSize.min,
+                          //     children: [
+                          //       Text('More', style: TextStyle(color: ThemeColor.textPrimary, fontSize: ThemeFont.titleMedium)),
+                          //       SizedBox(width: 4),
+                          //       Icon(Icons.chevron_right,
+                          //           size: ThemeFont.titleMedium, color: ThemeColor.textPrimary,),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -782,7 +782,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('NOTES', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+                            const Text('NOTES', style: TextStyle(fontSize: ThemeFont.titleMedium, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
                             IconButton(
                               onPressed: _showNotesDialog,
                               icon: const Icon(Icons.edit, size: 18, color: ThemeColor.textPrimary,),
@@ -796,7 +796,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         _notesController.text.isEmpty ? 'No notes' : _notesController.text,
                         style: const TextStyle(
                           color: ThemeColor.textSecondary,
-                          fontSize: 14,
+                          fontSize: ThemeFont.bodyMedium,
                         ),
                       ))))
                     ],
@@ -874,20 +874,20 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('DAILY',
+                const Text('Daily',
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
             Row(
               children: [
                 Text(Helper.currencyFormatter(totalIncome, '+'),
                     style: const TextStyle(
                         color: ThemeColor.income,
-                        fontSize: 14)),
+                        fontSize: ThemeFont.bodyMedium)),
                 const SizedBox(width: 12),
                 Text(Helper.currencyFormatter(totalExpense, '-'),
                     style: const TextStyle(
                         color: ThemeColor.textSecondary,
-                        fontSize: 14)),
+                        fontSize: ThemeFont.bodyMedium)),
               ],
             ),
               ],
@@ -1003,20 +1003,20 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('MONTHLY',
+                const Text('Monthly',
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: ThemeColor.textPrimary)),
+                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
               Row(
                 children: [
                   Text(Helper.currencyFormatter(totalIncome, '+'),
                       style: const TextStyle(
                           color: ThemeColor.income,
-                          fontSize: 14)),
+                          fontSize: ThemeFont.bodyMedium)),
                   const SizedBox(width: 12),
                   Text(Helper.currencyFormatter(totalExpense, '-'),
                       style: const TextStyle(
                           color: ThemeColor.textSecondary,
-                          fontSize: 14)),
+                          fontSize: ThemeFont.bodyMedium)),
                 ],
               ),
               ],
