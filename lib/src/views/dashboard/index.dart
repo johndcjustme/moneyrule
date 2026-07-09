@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:moneyrule/src/components/edit_transaction_sheet.dart';
+import 'package:moneyrule/src/components/graph_category_label.dart';
 import 'package:moneyrule/src/components/transaction_item.dart';
 import 'package:moneyrule/src/models/user.dart';
 import 'package:moneyrule/src/services/auth.dart';
@@ -23,6 +24,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   bool _showIncome = false;
+  bool _showIncomeInGraph = false;
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
   final TextEditingController _notesController = TextEditingController();
@@ -727,8 +729,22 @@ ListTile(
                      Padding(
                        padding: const EdgeInsets.symmetric(horizontal: 16),
                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                          children: [
+                           Row(
+                             mainAxisSize: MainAxisSize.min,
+                             children: [
+                               const Text('INCOME',
+                                   style: TextStyle(
+                                       color: ThemeColor.textSecondary)),
+                               Checkbox(
+                                 value: _showIncomeInGraph,
+                                 onChanged: (v) =>
+                                     setState(() => _showIncomeInGraph = v ?? false),
+                               ),
+                             ],
+                           ),
+                           Row(children: [
                            DropdownButton<int>(
                              value: _selectedMonth,
                              underline: const SizedBox(),
@@ -752,6 +768,7 @@ ListTile(
                                  .toList(),
                              onChanged: (v) => setState(() => _selectedYear = v!),
                            ),
+                          ],)
                          ],
                        ),
                      ),
@@ -923,69 +940,41 @@ ListTile(
 
     final maxExpense = List.generate(daysInMonth,
         (i) => dailyNeeds[i] + dailyWants[i] + dailySavings[i]).reduce(max);
-    final maxValue = max(maxExpense, dailyIncome.reduce(max));
+    final maxValue = max(maxExpense,
+        _showIncomeInGraph ? dailyIncome.reduce(max) : 0.0);
 
     return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: const Text('JUL 2026',
+            Center(child: Text(DateFormat('MMM y').format(DateTime(_selectedYear, _selectedMonth)).toUpperCase(),
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),),
+                        const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),),
 
             const SizedBox(height: 10),
 
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Income',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                    Text(Helper.currencyFormatter(totalIncome, '+'),
-                        style: const TextStyle(
-                            color: ThemeColor.income,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Needs',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                      Text(Helper.currencyFormatter(totalNeeds, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textPrimary,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Wants',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                      Text(Helper.currencyFormatter(totalWants, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodyMedium)),
-                 
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Save',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                      Text(Helper.currencyFormatter(totalSavings, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textTertiary,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
+              GraphCategoryLabel(
+                title: 'Income', 
+                value: Helper.currencyFormatter(totalIncome, '+'),
+                color: ThemeColor.income,
+              ),
+              GraphCategoryLabel(
+                title: 'Needs', 
+                value: Helper.currencyFormatter(totalNeeds, '-'),
+                color: ThemeColor.textPrimary,
+              ),
+              GraphCategoryLabel(
+                title: 'Wants', 
+                value: Helper.currencyFormatter(totalWants, '-'),
+                color: ThemeColor.textSecondary,
+              ),
+              GraphCategoryLabel(
+                title: 'Save', 
+                value: Helper.currencyFormatter(totalSavings, '-'),
+                color: ThemeColor.textTertiary,
+              ),
             ],),
 
             const SizedBox(height: 16),
@@ -1024,20 +1013,27 @@ ListTile(
                                   'Income: ${Helper.currencyFormatter(income, '+')}\nNeeds: ${Helper.currencyFormatter(needs, '-')}\nWants: ${Helper.currencyFormatter(wants, '-')}\nSavings: ${Helper.currencyFormatter(savings, '-')}',
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Container(
-                                    width: 14,
-                                    height: incomeHeight,
-                                    decoration: BoxDecoration(
-                                      color: ThemeColor.income,
-                                      borderRadius: const BorderRadius.vertical(
-                                          top: Radius.circular(2)),
+                                 children: [
+                                  if (_showIncomeInGraph)
+                                    Container(
+                                      width: 14,
+                                      height: incomeHeight,
+                                      decoration: BoxDecoration(
+                                        color: ThemeColor.income,
+                                        borderRadius: const BorderRadius.vertical(
+                                            top: Radius.circular(2)),
+                                      ),
                                     ),
-                                  ),
                                   Container(
                                     width: 14,
                                     height: savingsHeight,
-                                    color: ThemeColor.textPrimary,
+                                    decoration: BoxDecoration(
+                                      color: ThemeColor.textPrimary,
+                                      borderRadius: _showIncomeInGraph
+                                          ? null
+                                          : const BorderRadius.vertical(
+                                              top: Radius.circular(2)),
+                                    ),
                                   ),
                                   Container(
                                     width: 14,
@@ -1110,70 +1106,43 @@ ListTile(
 
     final maxExpense = List.generate(12,
         (i) => monthlyNeeds[i] + monthlyWants[i] + monthlySavings[i]).reduce(max);
-    final maxValue = max(maxExpense, monthlyIncome.reduce(max));
+    final maxValue = max(maxExpense,
+        _showIncomeInGraph ? monthlyIncome.reduce(max) : 0.0);
 
     return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: const Text('YEAR 2026',
+            Center(child:
+                Text('YEAR $_selectedYear',
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+                        const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
             ),
 
             const SizedBox(height: 10),
 
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Income',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                  Text(Helper.currencyFormatter(totalIncome, '+'),
-                        style: const TextStyle(
-                            color: ThemeColor.income,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Needs',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                   Text(Helper.currencyFormatter(totalNeeds, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textPrimary,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Wants',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                    Text(Helper.currencyFormatter(totalWants, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                 const Text('Save',
-                        style: TextStyle(
-                            color: ThemeColor.textSecondary,
-                            fontSize: ThemeFont.bodySmall)),
-                Text(Helper.currencyFormatter(totalSavings, '-'),
-                        style: const TextStyle(
-                            color: ThemeColor.textTertiary,
-                            fontSize: ThemeFont.bodyMedium)),
-              ],),
+              GraphCategoryLabel(
+                title: 'Income', 
+                value: Helper.currencyFormatter(totalIncome, '+'),
+                color: ThemeColor.income,
+              ),
+              GraphCategoryLabel(
+                title: 'Needs', 
+                value: Helper.currencyFormatter(totalNeeds, '-'),
+                color: ThemeColor.textPrimary,
+              ),
+              GraphCategoryLabel(
+                title: 'Wants', 
+                value: Helper.currencyFormatter(totalWants, '-'),
+                color: ThemeColor.textSecondary,
+              ),
+              GraphCategoryLabel(
+                title: 'Save', 
+                value: Helper.currencyFormatter(totalSavings, '-'),
+                color: ThemeColor.textTertiary,
+              ),
             ],),
 
             
@@ -1210,20 +1179,27 @@ ListTile(
                                 'Income: ${Helper.currencyFormatter(income, '+')}\nNeeds: ${Helper.currencyFormatter(needs, '-')}\nWants: ${Helper.currencyFormatter(wants, '-')}\nSavings: ${Helper.currencyFormatter(savings, '-')}',
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  width: 16,
-                                  height: incomeHeight,
-                                  decoration: BoxDecoration(
-                                    color: ThemeColor.income,
-                                    borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(2)),
+                               children: [
+                                if (_showIncomeInGraph)
+                                  Container(
+                                    width: 16,
+                                    height: incomeHeight,
+                                    decoration: BoxDecoration(
+                                      color: ThemeColor.income,
+                                      borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(2)),
+                                    ),
                                   ),
-                                ),
                                 Container(
                                   width: 16,
                                   height: savingsHeight,
-                                  color: ThemeColor.textPrimary,
+                                  decoration: BoxDecoration(
+                                    color: ThemeColor.textPrimary,
+                                    borderRadius: _showIncomeInGraph
+                                        ? null
+                                        : const BorderRadius.vertical(
+                                            top: Radius.circular(2)),
+                                  ),
                                 ),
                                 Container(
                                   width: 16,
