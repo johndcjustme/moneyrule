@@ -756,7 +756,7 @@ ListTile(
                                  .toList(),
                              onChanged: (v) => setState(() => _selectedMonth = v!),
                            ),
-                           const SizedBox(width: 16),
+                           const SizedBox(width: 12),
                            DropdownButton<int>(
                              value: _selectedYear,
                              underline: const SizedBox(),
@@ -901,15 +901,6 @@ ListTile(
   }
 
   Widget _buildDailyExpenseChart(List<TransactionModel> transactions) {
-    final years = transactions.map((t) => t.createdAt.year).toSet().toList()
-      ..sort();
-    if (!years.contains(DateTime.now().year)) {
-      years.add(DateTime.now().year);
-    }
-    if (!years.contains(_selectedYear)) {
-      _selectedYear = years.last;
-    }
-
     final daysInMonth =
         DateUtils.getDaysInMonth(_selectedYear, _selectedMonth);
     final dailyIncome = List<double>.filled(daysInMonth, 0);
@@ -1028,7 +1019,7 @@ ListTile(
                                     width: 14,
                                     height: savingsHeight,
                                     decoration: BoxDecoration(
-                                      color: ThemeColor.textPrimary,
+                                      color: ThemeColor.textTertiary,
                                       borderRadius: _showIncomeInGraph
                                           ? null
                                           : const BorderRadius.vertical(
@@ -1044,7 +1035,7 @@ ListTile(
                                     width: 14,
                                     height: needsHeight,
                                     decoration: const BoxDecoration(
-                                      color: ThemeColor.textTertiary,
+                                      color: ThemeColor.textPrimary,
                                       borderRadius: BorderRadius.vertical(
                                           bottom: Radius.circular(2)),
                                     ),
@@ -1070,15 +1061,6 @@ ListTile(
   }
 
   Widget _buildMonthlyExpenseChart(List<TransactionModel> transactions) {
-    final years = transactions.map((t) => t.createdAt.year).toSet().toList()
-      ..sort();
-    if (!years.contains(DateTime.now().year)) {
-      years.add(DateTime.now().year);
-    }
-    if (!years.contains(_selectedYear)) {
-      _selectedYear = years.last;
-    }
-
     final monthlyIncome = List<double>.filled(12, 0);
     final monthlyNeeds = List<double>.filled(12, 0);
     final monthlyWants = List<double>.filled(12, 0);
@@ -1194,7 +1176,7 @@ ListTile(
                                   width: 16,
                                   height: savingsHeight,
                                   decoration: BoxDecoration(
-                                    color: ThemeColor.textPrimary,
+                                    color: ThemeColor.textTertiary,
                                     borderRadius: _showIncomeInGraph
                                         ? null
                                         : const BorderRadius.vertical(
@@ -1210,7 +1192,7 @@ ListTile(
                                   width: 16,
                                   height: needsHeight,
                                   decoration: const BoxDecoration(
-                                    color: ThemeColor.textTertiary,
+                                    color: ThemeColor.textPrimary,
                                     borderRadius: BorderRadius.vertical(
                                         bottom: Radius.circular(2)),
                                   ),

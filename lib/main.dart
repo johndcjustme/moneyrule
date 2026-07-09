@@ -47,7 +47,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Finance Tracker',
+      title: 'SplitWise',
       initialRoute: '/',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
