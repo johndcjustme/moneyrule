@@ -26,7 +26,7 @@ class CardExpenses extends StatelessWidget {
     return Expanded(child: Card(color: ThemeColor.background, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
-      side: const BorderSide(color: Color.fromARGB(147, 39, 39, 39), width: 1)), 
+      side: const BorderSide(color: Color.fromARGB(172, 39, 39, 39), width: 1)), 
     child: Padding(padding: const EdgeInsets.all(16),child: 
     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [

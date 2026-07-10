@@ -554,10 +554,11 @@ class _DashboardPageState extends State<DashboardPage> {
     final totalWants = dailyWants.fold<double>(0, (s, v) => s + v);
     final totalSavings = dailySavings.fold<double>(0, (s, v) => s + v);
 
-    final maxExpense = List.generate(daysInMonth,
-        (i) => dailyNeeds[i] + dailyWants[i] + dailySavings[i]).reduce(max);
-    final maxValue = max(maxExpense,
-        _showIncomeInGraph ? dailyIncome.reduce(max) : 0.0);
+    final maxDailyTotal = List.generate(daysInMonth, (i) {
+      final total = dailyNeeds[i] + dailyWants[i] + dailySavings[i];
+      return _showIncomeInGraph ? dailyIncome[i] + total : total;
+    }).reduce(max);
+    final maxValue = maxDailyTotal;
 
     return Padding(
         padding: const EdgeInsets.all(16),
@@ -700,10 +701,11 @@ class _DashboardPageState extends State<DashboardPage> {
     final totalWants = monthlyWants.fold<double>(0, (s, v) => s + v);
     final totalSavings = monthlySavings.fold<double>(0, (s, v) => s + v);
 
-    final maxExpense = List.generate(12,
-        (i) => monthlyNeeds[i] + monthlyWants[i] + monthlySavings[i]).reduce(max);
-    final maxValue = max(maxExpense,
-        _showIncomeInGraph ? monthlyIncome.reduce(max) : 0.0);
+    final maxMonthlyTotal = List.generate(12, (i) {
+      final total = monthlyNeeds[i] + monthlyWants[i] + monthlySavings[i];
+      return _showIncomeInGraph ? monthlyIncome[i] + total : total;
+    }).reduce(max);
+    final maxValue = maxMonthlyTotal;
 
     return Padding(
         padding: const EdgeInsets.all(16),
