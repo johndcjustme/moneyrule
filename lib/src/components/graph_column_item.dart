@@ -16,7 +16,7 @@ class GraphColumnItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 14,
+        width: 12,
         height: height,
         decoration: BoxDecoration(
           color: color,
