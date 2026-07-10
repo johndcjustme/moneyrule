@@ -608,16 +608,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     final savings = dailySavings[i];
                     final incomeHeight = maxValue == 0
                         ? 0.0
-                        : (income / maxValue) * 110;
+                        : (income / maxValue) * 135;
                     final needsHeight = maxValue == 0
                         ? 0.0
-                        : (needs / maxValue) * 110;
+                        : (needs / maxValue) * 135;
                     final wantsHeight = maxValue == 0
                         ? 0.0
-                        : (wants / maxValue) * 110;
+                        : (wants / maxValue) * 135;
                     final savingsHeight = maxValue == 0
                         ? 0.0
-                        : (savings / maxValue) * 110;
+                        : (savings / maxValue) * 135;
                     return SizedBox(
                       width: 24,
                       child: Padding(
@@ -756,16 +756,16 @@ class _DashboardPageState extends State<DashboardPage> {
                   final savings = monthlySavings[i];
                   final incomeHeight = maxValue == 0
                       ? 0.0
-                      : (income / maxValue) * 110;
+                      : (income / maxValue) * 135;
                   final needsHeight = maxValue == 0
                       ? 0.0
-                      : (needs / maxValue) * 110;
+                      : (needs / maxValue) * 135;
                   final wantsHeight = maxValue == 0
                       ? 0.0
-                      : (wants / maxValue) * 110;
+                      : (wants / maxValue) * 135;
                   final savingsHeight = maxValue == 0
                       ? 0.0
-                      : (savings / maxValue) * 110;
+                      : (savings / maxValue) * 135;
                   return Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
