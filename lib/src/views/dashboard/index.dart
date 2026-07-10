@@ -605,11 +605,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                   GraphColumnItem(
                                     height: wantsHeight,
                                     color: ThemeColor.textSecondary, 
+                                    borderRadius: savingsHeight <= 0 ? const BorderRadius.vertical(top: Radius.circular(2)) : null,
                                   ),
                                   GraphColumnItem(
                                     height: needsHeight,
                                     color: ThemeColor.textPrimary, 
-                                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2))
+                                    borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular(wantsHeight <= 0 && savingsHeight <= 0 ? 2 : 0))
                                   ),
                                 ],
                               ),
@@ -751,7 +752,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 GraphColumnItem(
                                   height: needsHeight,
                                   color: ThemeColor.textPrimary, 
-                                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2))
+                                  borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular(wantsHeight <= 0 && savingsHeight <=0 ? 2 : 0))
                                 ),
                               ],
                             ),

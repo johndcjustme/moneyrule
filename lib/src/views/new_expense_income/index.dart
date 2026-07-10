@@ -24,14 +24,12 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
   Category? _selectedCategory;
   bool _splitIncome = true;
   Category? _incomeCategory;
-  final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
     final categoriesBox = Hive.box<Category>('categories');
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar:
           AppBar(title: Text(widget.isIncome ? 'Add Income' : 'Add Expense')),
       body: Padding(
@@ -165,7 +163,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                     description.isEmpty ||
                     (!widget.isIncome && _selectedCategory == null) ||
                     (widget.isIncome && !_splitIncome && _incomeCategory == null)) {
-                  _scaffoldKey.currentState!.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Fill all fields')),
                   );
                   return;
@@ -173,7 +171,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
 
                 final double? amount = double.tryParse(amountText);
                 if (amount == null || amount <= 0) {
-                  _scaffoldKey.currentState!.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Enter a valid amount')),
                   );
                   return;
