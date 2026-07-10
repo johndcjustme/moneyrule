@@ -748,6 +748,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 GraphColumnItem(
                                   height: wantsHeight,
                                   color: ThemeColor.textSecondary, 
+                                  borderRadius: savingsHeight <= 0 ? const BorderRadius.vertical(top: Radius.circular(2)) : null,
                                 ),
                                 GraphColumnItem(
                                   height: needsHeight,
