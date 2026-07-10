@@ -26,50 +26,29 @@ class CardExpenses extends StatelessWidget {
     return Expanded(child: Card(color: ThemeColor.background, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
-      side: const BorderSide(color: ThemeColor.expense, width: 1)), 
+      side: const BorderSide(color: Color.fromARGB(147, 39, 39, 39), width: 1)), 
     child: Padding(padding: const EdgeInsets.all(16),child: 
     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title.toUpperCase(), style: const TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
-          Text(Helper.currencyFormatter(total, '-'), style: const TextStyle(fontSize: ThemeFont.bodyLarge, fontWeight: FontWeight.bold)),
-        ],),
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('$transactions TX', style: const TextStyle(fontSize: ThemeFont.bodySmall)),
-          // Text('Trnsctns', style: TextStyle(fontSize: ThemeFont.bodySmall))
-        ],)
+        Text(title.toUpperCase(), style: const TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+        Text('$transactions TX', style: const TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.textSecondary)),
       ],),
+      const SizedBox(height: 4),
+      Text(Helper.currencyFormatter(total, '-'), style: const TextStyle(fontWeight: FontWeight.bold)),
 
-      const SizedBox(height: 16),
+      const SizedBox(height: 14),
 
-      // Row(children: [
-      //   Expanded(child: Column(children: [
-      //     Text('N', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
-      //     Text('-50,500.00', style: TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall))
-      //   ],)),
-      //   SizedBox(width: 5),
-      //     Expanded(child: Column(children: [
-      //     Text('W', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
-      //     Text('-500.00', style: TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall))
-      //   ],)),
-      //   SizedBox(width: 5),
-      //   Expanded(child: Column(children: [
-      //     Text('S', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
-      //     Text('-500.00', style: TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall))
-      //   ],)),
-      // ],),
-      
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(Helper.currencyFormatter(needs, '-'), style: const TextStyle(color: ThemeColor.textSecondary)),
-        const Text('N', style: TextStyle(color: ThemeColor.textTertiary)),
+        Text(Helper.currencyFormatter(needs, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
+        const Text('N', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(Helper.currencyFormatter(wants, '-'), style: const TextStyle(color: ThemeColor.textSecondary)),
-        const Text('W', style: TextStyle(color: ThemeColor.textTertiary)),
+        Text(Helper.currencyFormatter(wants, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
+        const Text('W', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(Helper.currencyFormatter(save, '-'), style: const TextStyle(color: ThemeColor.textSecondary)),
-        const Text('S', style: TextStyle(color: ThemeColor.textTertiary)),
+        Text(Helper.currencyFormatter(save, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
+        const Text('S', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
     ],))));
   }

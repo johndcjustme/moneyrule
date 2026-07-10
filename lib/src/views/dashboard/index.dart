@@ -131,9 +131,17 @@ class _DashboardPageState extends State<DashboardPage> {
                   tx.createdAt.month == today.month &&
                   tx.createdAt.day == today.day)
               .toList();
-          final todayExpenseTotal = todayExpenses.fold<double>(
-              0, (sum, tx) => sum + tx.amount);
+          final yesterday = DateTime(today.year, today.month, today.day - 1);
+          final yesterdayExpenses = transactions
+              .where((tx) =>
+                  !tx.isNewIncome &&
+                  tx.createdAt.year == yesterday.year &&
+                  tx.createdAt.month == yesterday.month &&
+                  tx.createdAt.day == yesterday.day)
+              .toList();
 
+          final todayBreakdown = _expenseBreakdown(todayExpenses);
+          final yesterdayBreakdown = _expenseBreakdown(yesterdayExpenses);
 
           final sortedExpenses = todayExpenses.toList()
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -245,20 +253,20 @@ class _DashboardPageState extends State<DashboardPage> {
                                           Row(children: [
                                             CardExpenses(
                                               title: 'Today',
-                                              total: 0,
-                                              needs: 0,
-                                              wants: 0,
-                                              save: 0,
-                                              transactions: 0,
+                                              total: todayBreakdown.total,
+                                              needs: todayBreakdown.needs,
+                                              wants: todayBreakdown.wants,
+                                              save: todayBreakdown.save,
+                                              transactions: todayBreakdown.count,
                                             ),
-                                            SizedBox(width: 10),
+                                            const SizedBox(width: 8),
                                             CardExpenses(
                                               title: 'Yesterday',
-                                              total: 0,
-                                              needs: 0,
-                                              wants: 0,
-                                              save: 0,
-                                              transactions: 0,
+                                              total: yesterdayBreakdown.total,
+                                              needs: yesterdayBreakdown.needs,
+                                              wants: yesterdayBreakdown.wants,
+                                              save: yesterdayBreakdown.save,
+                                              transactions: yesterdayBreakdown.count,
                                             ),
 
                                           ],),
@@ -271,12 +279,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                                 child: Row(
                                                   children: [
                                                     const Padding(
-                                                      padding: const EdgeInsets.only(right: 16),
+                                                      padding: EdgeInsets.only(right: 16),
                                                       child: Column(
                                                         children: [
                                                           Row(
                                                             children: [
-                                                            Text('TODAY: ',
+                                                            Text('TODAY\'S TX: ',
                                                                 style: TextStyle(
                                                                     color: ThemeColor.textSecondary)),
                                                             // Text(Helper.currencyFormatter(
@@ -493,6 +501,23 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
     );
+  }
+
+  ({double total, double needs, double wants, double save, int count})
+      _expenseBreakdown(List<TransactionModel> expenses) {
+    double total = 0, needs = 0, wants = 0, save = 0;
+    for (final tx in expenses) {
+      total += tx.amount;
+      final name = _categoryName(tx);
+      if (name == 'needs') {
+        needs += tx.amount;
+      } else if (name == 'wants') {
+        wants += tx.amount;
+      } else if (name == 'save') {
+        save += tx.amount;
+      }
+    }
+    return (total: total, needs: needs, wants: wants, save: save, count: expenses.length);
   }
 
   String? _categoryName(TransactionModel tx) {
