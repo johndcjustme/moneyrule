@@ -12,6 +12,8 @@ import 'src/models/transaction_model.dart';
 import 'src/views/account/index.dart';
 import 'src/views/transactions/index.dart';
 
+import 'dart:developer' as developer;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:moneyrule/src/components/card_expenses.dart';
 import 'package:moneyrule/src/components/category_summary_item.dart';
 import 'package:moneyrule/src/components/edit_transaction_sheet.dart';
 import 'package:moneyrule/src/components/graph_category_label.dart';
@@ -16,6 +17,7 @@ import 'package:moneyrule/src/components/select_year.dart';
 import 'package:moneyrule/src/components/transaction_item.dart';
 import 'package:moneyrule/src/models/user.dart';
 import 'package:moneyrule/src/services/auth.dart';
+import 'package:moneyrule/src/services/notes_service.dart';
 import 'package:moneyrule/src/utils/theme_color.dart';
 import 'package:moneyrule/src/utils/theme_front.dart';
 import '../../helpers/helper.dart';
@@ -35,6 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
   final TextEditingController _notesController = TextEditingController();
+  final _notesService = NotesService();  
 
   @override
   void initState() {
@@ -55,21 +58,6 @@ class _DashboardPageState extends State<DashboardPage> {
   void dispose() {
     _notesController.dispose();
     super.dispose();
-  }
-
-  void _saveNotes() {
-    final userBox = Hive.box<User>('users');
-    User? currentUser;
-    try {
-      currentUser = userBox.values.firstWhere((user) => user.isLogin == true);
-    } catch (e) {
-      currentUser = null;
-    }
-    if (currentUser != null && mounted) {
-      currentUser.notes = _notesController.text;
-      currentUser.save();
-      User.updateNotes(context, currentUser, _notesController.text);
-    }
   }
 
   void _showNotesDialog() {
@@ -96,7 +84,8 @@ class _DashboardPageState extends State<DashboardPage> {
           ElevatedButton(
             onPressed: () {
               _notesController.text = dialogController.text;
-              _saveNotes();
+              _notesService.saveNotes(_notesController.text);
+              // _saveNotes();
               setState(() {});
               Navigator.pop(context);
             },
@@ -172,8 +161,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: ListView(
                   children: [
                     const Padding(padding:  EdgeInsets.all(16), child: Row(children: [
-                      Text('Split', style: TextStyle(color: ThemeColor.textSecondary)),
-                      Text('Wise', style: TextStyle(color: ThemeColor.income)),
+                      Text('Split', style: TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.textSecondary)),
+                      Text('Wise', style: TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.income)),
                     ])),
                     Padding(padding: const EdgeInsets.only(left: 16, right: 16, bottom: 75), child: 
                     Row(
@@ -251,25 +240,47 @@ class _DashboardPageState extends State<DashboardPage> {
                             child: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                     child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(children: [
+                                            CardExpenses(
+                                              title: 'Today',
+                                              total: 0,
+                                              needs: 0,
+                                              wants: 0,
+                                              save: 0,
+                                              transactions: 0,
+                                            ),
+                                            SizedBox(width: 10),
+                                            CardExpenses(
+                                              title: 'Yesterday',
+                                              total: 0,
+                                              needs: 0,
+                                              wants: 0,
+                                              save: 0,
+                                              transactions: 0,
+                                            ),
+
+                                          ],),
+
+                                          const SizedBox(height: 30),
 
                                           if (todayExpenses.isNotEmpty)
                                             Padding(padding: const EdgeInsets.only(bottom: 32), child: SingleChildScrollView(
                                                 scrollDirection: Axis.horizontal,
                                                 child: Row(
                                                   children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(right: 24),
+                                                    const Padding(
+                                                      padding: const EdgeInsets.only(right: 16),
                                                       child: Column(
                                                         children: [
                                                           Row(
                                                             children: [
-                                                            const Text('TODAY: ',
+                                                            Text('TODAY: ',
                                                                 style: TextStyle(
                                                                     color: ThemeColor.textSecondary)),
-                                                            Text(Helper.currencyFormatter(
-                                                                todayExpenseTotal, '-'), style: const TextStyle(fontWeight: FontWeight.bold))
+                                                            // Text(Helper.currencyFormatter(
+                                                            //     todayExpenseTotal, '-'), style: const TextStyle(fontWeight: FontWeight.bold))
                                                           ],
                                                         )
                                                       ],
@@ -285,7 +296,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                                           const EdgeInsets.only(right: 16),
                                                       child: Text(name,
                                                           style: const TextStyle(
-                                                              color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
+                                                              color: ThemeColor.textTertiary)),
                                                     );
                                                   }),
                                                   Padding(
@@ -300,7 +311,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                                       child: const Row(children: [
                                                         Text('More Transactions',
                                                           style: TextStyle(
-                                                              color: ThemeColor.textTertiary, fontSize: 12)),
+                                                              color: ThemeColor.textTertiary)),
                                                         SizedBox(width: 2),
                                                         Icon(Icons.chevron_right, size: 14, color: ThemeColor.textTertiary,)
                                                       ],),
@@ -314,6 +325,9 @@ class _DashboardPageState extends State<DashboardPage> {
                               )),
                           )
                       ]),
+
+
+                      // add tab here with values All(default), Today, Yesterday
 
                       Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -383,9 +397,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       balance: balance
                     ),
 
-                     const SizedBox(
-                       height: 32,
-                     ),
+                    const SizedBox(
+                      height: 32,
+                    ),
 
                      Padding(
                        padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -595,22 +609,25 @@ class _DashboardPageState extends State<DashboardPage> {
                                     GraphColumnItem(
                                       height: incomeHeight,
                                       color: ThemeColor.income, 
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(2)) 
+                                      borderRadius: BorderRadius.vertical(
+                                        top: const Radius.circular(2),
+                                        bottom: Radius.circular(savingsHeight > 0 || wantsHeight > 0 || needsHeight > 0 ? 0 : 2)
+                                      ) 
                                     ),
                                   GraphColumnItem(
                                     height: savingsHeight,
                                     color: ThemeColor.textTertiary, 
-                                    borderRadius: _showIncomeInGraph ? null : const BorderRadius.vertical(top: Radius.circular(2))
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(_showIncomeInGraph && savingsHeight > 0 ? 0 : 2), bottom: Radius.circular(needsHeight > 0 || wantsHeight > 0 ? 0 : 2))
                                   ),
                                   GraphColumnItem(
                                     height: wantsHeight,
                                     color: ThemeColor.textSecondary, 
-                                    borderRadius: savingsHeight <= 0 ? const BorderRadius.vertical(top: Radius.circular(2)) : null,
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular((_showIncomeInGraph && incomeHeight > 0) || savingsHeight > 0 ? 0 : 2), bottom: Radius.circular(needsHeight > 0 ? 0 : 2)),
                                   ),
                                   GraphColumnItem(
                                     height: needsHeight,
                                     color: ThemeColor.textPrimary, 
-                                    borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular(wantsHeight <= 0 && savingsHeight <= 0 ? 2 : 0))
+                                    borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular((_showIncomeInGraph && incomeHeight > 0) || wantsHeight > 0 || savingsHeight > 0 ? 0 : 2))
                                   ),
                                 ],
                               ),
@@ -738,22 +755,25 @@ class _DashboardPageState extends State<DashboardPage> {
                                   GraphColumnItem(
                                     height: incomeHeight,
                                     color: ThemeColor.income, 
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(2))
+                                    borderRadius: BorderRadius.vertical(
+                                      top: const Radius.circular(2), 
+                                      bottom: Radius.circular(savingsHeight > 0 || wantsHeight > 0 || needsHeight > 0 ? 0 : 2)
+                                    )
                                   ),
                                 GraphColumnItem(
                                   height: savingsHeight,
                                   color: ThemeColor.textTertiary, 
-                                  borderRadius: _showIncomeInGraph ? null : const BorderRadius.vertical(top: Radius.circular(2))
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(_showIncomeInGraph && incomeHeight > 0 ? 0 : 2), bottom: Radius.circular(needsHeight > 0 || wantsHeight > 0 ? 0 : 2))
                                 ),
                                 GraphColumnItem(
                                   height: wantsHeight,
                                   color: ThemeColor.textSecondary, 
-                                  borderRadius: savingsHeight <= 0 ? const BorderRadius.vertical(top: Radius.circular(2)) : null,
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular((_showIncomeInGraph && incomeHeight > 0) || savingsHeight > 0 ? 0 : 2), bottom: Radius.circular(needsHeight > 0 ? 0 : 2)),
                                 ),
                                 GraphColumnItem(
                                   height: needsHeight,
                                   color: ThemeColor.textPrimary, 
-                                  borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular(wantsHeight <= 0 && savingsHeight <=0 ? 2 : 0))
+                                  borderRadius: BorderRadius.vertical(bottom: const Radius.circular(2), top: Radius.circular((_showIncomeInGraph && incomeHeight > 0) || wantsHeight > 0 || savingsHeight > 0 ? 0 : 2))
                                 ),
                               ],
                             ),
