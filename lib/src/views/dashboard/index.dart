@@ -18,7 +18,6 @@ import 'package:moneyrule/src/models/user.dart';
 import 'package:moneyrule/src/services/auth.dart';
 import 'package:moneyrule/src/utils/theme_color.dart';
 import 'package:moneyrule/src/utils/theme_front.dart';
-import 'package:pie_chart/pie_chart.dart';
 import '../../helpers/helper.dart';
 import '../../models/category.dart';
 import '../../models/transaction_model.dart';
@@ -176,7 +175,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       Text('Split', style: TextStyle(color: ThemeColor.textSecondary)),
                       Text('Wise', style: TextStyle(color: ThemeColor.income)),
                     ])),
-                    Padding(padding: const EdgeInsets.only(left: 16, right: 16, bottom: 75, top: 4), child: 
+                    Padding(padding: const EdgeInsets.only(left: 16, right: 16, bottom: 75), child: 
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -378,7 +377,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     }),
 
                     CategorySummaryItem(
-                      title: 'All', 
+                      title: 'Summary', 
                       subtitle: balance + expenseTotal, 
                       expense: expenseTotal, 
                       balance: balance
