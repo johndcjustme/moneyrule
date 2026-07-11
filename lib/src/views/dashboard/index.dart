@@ -271,7 +271,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                                           ],),
 
-                                          const SizedBox(height: 30),
+                                          const SizedBox(height: 32),
 
                                           if (todayExpenses.isNotEmpty)
                                             Padding(padding: const EdgeInsets.only(bottom: 32), child: SingleChildScrollView(
@@ -336,12 +336,47 @@ class _DashboardPageState extends State<DashboardPage> {
 
 
                       // add tab here with values All(default), Today, Yesterday
+                      // const SizedBox(height: 16,),
 
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                        GestureDetector(
+                      // Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   crossAxisAlignment: CrossAxisAlignment.end,
+                      //   children: [
+                      //   GestureDetector(
+                      //     onTap: () {
+                      //       setState(() {
+                      //         _showIncome = !_showIncome;
+                      //       });
+                      //     },
+                      //     child: Text(
+                      //     _showIncome
+                      //         ? Helper.currencyFormatter(
+                      //             balance)
+                      //         : '••••••',
+                      //     style: TextStyle(
+                      //       fontSize: ThemeFont.headlineSmall,
+                      //       color: balance < 0 ? ThemeColor.danger : ThemeColor.income
+                      //       // fontWeight: FontWeight.bold
+                      //     ),
+                      //   )
+                      //   ),
+                      //   Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(fontSize: 16, color: ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
+                      // ])),
+
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                      //   child: LinearProgressIndicator(
+                      //     value: total == 0 ? 0 : incomeRatio,
+                      //     backgroundColor: ThemeColor.expense,
+                      //     valueColor: const AlwaysStoppedAnimation<Color>(ThemeColor.income),
+                      //     minHeight: 6.0,
+                      //     borderRadius: const BorderRadius.all(Radius.circular(4)),
+                      //   ),
+                      // ),
+
+                    Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: [
+
+                      GestureDetector(
                           onTap: () {
                             setState(() {
                               _showIncome = !_showIncome;
@@ -353,17 +388,17 @@ class _DashboardPageState extends State<DashboardPage> {
                                   balance)
                               : '••••••',
                           style: TextStyle(
-                            fontSize: ThemeFont.headlineSmall,
+                            fontSize: ThemeFont.headlineMedium,
                             color: balance < 0 ? ThemeColor.danger : ThemeColor.income
                             // fontWeight: FontWeight.bold
                           ),
                         )
                         ),
-                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(fontSize: 16, color: ThemeColor.textSecondary, fontWeight: FontWeight.bold ))
-                      ])),
 
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+
+                      Container(
+                        width: 200,
+                        padding: const EdgeInsets.symmetric(vertical: 5),
                         child: LinearProgressIndicator(
                           value: total == 0 ? 0 : incomeRatio,
                           backgroundColor: ThemeColor.expense,
@@ -373,40 +408,64 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
 
-                    const SizedBox(
-                      height: 27,
-                    ),
+                        Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(fontSize: 16, color: ThemeColor.textSecondary, fontWeight: FontWeight.bold )),
+                        const Text('This Month', style: TextStyle(fontSize: ThemeFont.bodySmall, color: ThemeColor.textSecondary, ))
 
-                    ...categories.map((cat) {
-                      final catId = cat.key as int;
-                      final incomeForCat = transactions
-                          .where(
-                              (tx) => tx.isNewIncome && tx.categoryId == catId)
-                          .fold<double>(0, (sum, tx) => sum + tx.amount);
-                      final expenseForCat = transactions
-                          .where(
-                              (tx) => !tx.isNewIncome && tx.categoryId == catId)
-                          .fold<double>(0, (sum, tx) => sum + tx.amount);
-                      final balanceForCat = incomeForCat - expenseForCat;
-                      final double totalIncome = balanceForCat + expenseForCat;
-
-                      return CategorySummaryItem(
-                        title: cat.name, 
-                        subtitle: totalIncome, 
-                        expense: expenseForCat, 
-                        balance: balanceForCat
-                      );
-                    }),
-
-                    CategorySummaryItem(
-                      title: 'Summary', 
-                      subtitle: balance + expenseTotal, 
-                      expense: expenseTotal, 
-                      balance: balance
-                    ),
+                    ],),
 
                     const SizedBox(
-                      height: 32,
+                      height: 16,
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16), 
+                      child: Row(
+                        children: [
+                          ...categories.map((cat) {
+                            final catId = cat.key as int;
+                            
+                            // 1. Capture the present date metadata components
+                            final now = DateTime.now();
+                            final currentYear = now.year;
+                            final currentMonth = now.month;
+
+                            final incomeForCat = transactions
+                                .where((tx) => tx.isNewIncome && tx.categoryId == catId)
+                                .fold<double>(0, (sum, tx) => sum + tx.amount);
+
+                            // 2. CRUCIAL UPDATE: Filter expenses to ONLY get items from the present month
+                            final expenseForCat = transactions
+                                .where((tx) => 
+                                    !tx.isNewIncome && 
+                                    tx.categoryId == catId &&
+                                    tx.createdAt.year == currentYear && // Checks matching year
+                                    tx.createdAt.month == currentMonth, // Checks matching month
+                                )
+                                .fold<double>(0, (sum, tx) => sum + tx.amount);
+
+                            final balanceForCat = incomeForCat - expenseForCat;
+                            final double totalIncome = balanceForCat + expenseForCat;
+
+                            return CategorySummaryItem(
+                              title: cat.name, 
+                              subtitle: totalIncome, 
+                              expense: expenseForCat, 
+                              balance: balanceForCat,
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+
+                    // CategorySummaryItem(
+                    //   title: 'Summary', 
+                    //   subtitle: balance + expenseTotal, 
+                    //   expense: expenseTotal, 
+                    //   balance: balance
+                    // ),
+
+                    const SizedBox(
+                      height: 40,
                     ),
 
                      Padding(

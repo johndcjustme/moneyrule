@@ -197,6 +197,8 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
               .where((tx) => !tx.isNewIncome)
               .fold<double>(0, (sum, tx) => sum + tx.amount);
 
+          final overallBalance = incomeTotal - expenseTotal;
+
           double totalForCategory(String name) {
             return filteredTx
                 .where((tx) {
@@ -218,54 +220,124 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
 
           return ListView(
             children: [
-              if (_selectedRange != null)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+              // Always show summary section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Show filter info if applied
+                    if (_selectedRange != null) ...[
                       Text(
                         'Showing: ${DateFormat('MMM d, y').format(_selectedRange!.start)} → ${DateFormat('MMM d, y').format(_selectedRange!.end)}',
-                        style:
-                            const TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 14),
                       ),
                       const SizedBox(height: 16),
-                      Text('Transactions: ${filteredTx.length}', style: TextStyle(color: ThemeColor.textSecondary)),
-                      const SizedBox(height: 16),
-                       Row(children: [
-                        const Text('Income: '),
-                        Text(Helper.currencyFormatter(incomeTotal, '+'), style: const TextStyle(color: ThemeColor.income, fontWeight: FontWeight.bold)),
-                      ],),
-                        Row(children: [
-                          const Text('Deductions: '),
-                          Text(Helper.currencyFormatter(expenseTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
-                        ],),
-
-                        Padding(padding: const EdgeInsets.only(left: 16), child: Column(children: [
-                        Row(children: [
-                          const Text('Needs: ', style: TextStyle(color: ThemeColor.textSecondary)),
-                          Text(Helper.currencyFormatter(needTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
-                        ],),
-                        Row(children: [
-                          const Text('Wants: ', style: TextStyle(color: ThemeColor.textSecondary)),
-                          Text(Helper.currencyFormatter(wantsTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
-                        ],),
-                        Row(children: [
-                          const Text('Savings: ', style: TextStyle(color: ThemeColor.textSecondary)),
-                          Text(Helper.currencyFormatter(savingsTotal, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontWeight: FontWeight.bold)),
-                        ],)])),
-                      const SizedBox(height: 16),
-             
-                       
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      const Text('TRANSACTIONS', style: TextStyle(fontSize: ThemeFont.bodyLarge, fontWeight: FontWeight.bold)),
-                      // Text(
-                      //     '🧮 Overall Total: ${Helper.currencyFormatter(incomeTotal - expenseTotal, (incomeTotal - expenseTotal) >= 0 ? '+' : '')}'),
                     ],
-                  ),
+                    
+                    // Transaction count
+                    Text(
+                      'Transactions: ${filteredTx.length}', 
+                      style: TextStyle(color: ThemeColor.textSecondary)
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Income
+                    Row(children: [
+                      const Text('Income: '),
+                      Text(
+                        Helper.currencyFormatter(incomeTotal, '+'), 
+                        style: const TextStyle(
+                          color: ThemeColor.income, 
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                    ]),
+                    
+                    // Expenses (Deductions)
+                    Row(children: [
+                      const Text('Deductions: '),
+                      Text(
+                        Helper.currencyFormatter(expenseTotal, '-'), 
+                        style: const TextStyle(
+                          color: ThemeColor.textSecondary, 
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                    ]),
+                    
+                    // Overall Balance
+                    Row(children: [
+                      const Text('Overall Balance: '),
+                      Text(
+                        Helper.currencyFormatter(
+                          overallBalance, 
+                          overallBalance >= 0 ? '+' : ''
+                        ), 
+                        style: TextStyle(
+                          color: overallBalance >= 0 ? ThemeColor.income : Colors.red, 
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                    ]),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Category breakdown (Needs, Wants, Savings)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16), 
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            const Text('Needs: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                            Text(
+                              Helper.currencyFormatter(needTotal, '-'), 
+                              style: const TextStyle(
+                                color: ThemeColor.textSecondary, 
+                                fontWeight: FontWeight.bold
+                              )
+                            ),
+                          ]),
+                          Row(children: [
+                            const Text('Wants: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                            Text(
+                              Helper.currencyFormatter(wantsTotal, '-'), 
+                              style: const TextStyle(
+                                color: ThemeColor.textSecondary, 
+                                fontWeight: FontWeight.bold
+                              )
+                            ),
+                          ]),
+                          Row(children: [
+                            const Text('Savings: ', style: TextStyle(color: ThemeColor.textSecondary)),
+                            Text(
+                              Helper.currencyFormatter(savingsTotal, '-'), 
+                              style: const TextStyle(
+                                color: ThemeColor.textSecondary, 
+                                fontWeight: FontWeight.bold
+                              )
+                            ),
+                          ]),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'TRANSACTIONS', 
+                      style: TextStyle(
+                        fontSize: ThemeFont.bodyLarge, 
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
+                  ],
                 ),
+              ),
+              
+              // Transaction list
               ...filteredTx.map((tx) {
                 final category = catBox.get(tx.categoryId);
                 return TransactionItem(
