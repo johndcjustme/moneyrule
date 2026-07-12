@@ -366,7 +366,7 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                       controller: _searchController,
                       onChanged: _onSearchChanged,
                       decoration: InputDecoration(
-                        hintText: 'Search description...',
+                        hintText: 'Search',
                         hintStyle:
                             const TextStyle(color: ThemeColor.textTertiary),
                         prefixIcon: const Icon(Icons.search,

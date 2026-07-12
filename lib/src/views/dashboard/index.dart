@@ -250,25 +250,74 @@ class _DashboardPageState extends State<DashboardPage> {
                                     child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(children: [
-                                            CardExpenses(
-                                              title: 'Today',
-                                              total: todayBreakdown.total,
-                                              needs: todayBreakdown.needs,
-                                              wants: todayBreakdown.wants,
-                                              save: todayBreakdown.save,
-                                              transactions: todayBreakdown.count,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            CardExpenses(
-                                              title: 'Yesterday',
-                                              total: yesterdayBreakdown.total,
-                                              needs: yesterdayBreakdown.needs,
-                                              wants: yesterdayBreakdown.wants,
-                                              save: yesterdayBreakdown.save,
-                                              transactions: yesterdayBreakdown.count,
-                                            ),
+                                          // Row(children: [
+                                          //   CardExpenses(
+                                          //     title: 'Today',
+                                          //     total: todayBreakdown.total,
+                                          //     needs: todayBreakdown.needs,
+                                          //     wants: todayBreakdown.wants,
+                                          //     save: todayBreakdown.save,
+                                          //     transactions: todayBreakdown.count,
+                                          //   ),
+                                          //   const SizedBox(width: 8),
+                                          //   CardExpenses(
+                                          //     title: 'Yesterday',
+                                          //     total: yesterdayBreakdown.total,
+                                          //     needs: yesterdayBreakdown.needs,
+                                          //     wants: yesterdayBreakdown.wants,
+                                          //     save: yesterdayBreakdown.save,
+                                          //     transactions: yesterdayBreakdown.count,
+                                          //   ),
 
+                                          // ],),
+
+                                          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                            Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                              const Text('Today', style: TextStyle(color: ThemeColor.textPrimary, fontWeight: FontWeight.bold)),
+                                              Text(Helper.currencyFormatter(todayBreakdown.total, '-'), style: const TextStyle(fontSize: ThemeFont.titleLarge, color: ThemeColor.textSecondary)),
+                                              Center(child: Container(width: 200, child: const Divider(color: ThemeColor.textTertiary, thickness: 0.5,),)),
+                                              Text(Helper.currencyFormatter(yesterdayBreakdown.total, '-'), style: const TextStyle(fontSize: ThemeFont.bodyMedium, color: ThemeColor.textTertiary, fontWeight: FontWeight.bold)),
+                                              const Text('Yesterday', style: TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
+                                            ],),
+                                            // SizedBox(width: 16,),
+                                            //   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                            //   Text('YESTERDAY', style: TextStyle(color: ThemeColor.textSecondary)),
+                                            //   Text('-10,000.00', style: TextStyle(fontSize: ThemeFont.titleMedium, color: ThemeColor.textTertiary, fontWeight: FontWeight.bold)),
+                                            // ],),
+                                            // const SizedBox(width: 16,),
+                                            // const SizedBox(width: 16,),
+                                            // Text('YESTERDAY', style: TextStyle(color: ThemeColor.textTertiary),),
+                                          ],),
+                                          // Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Center(child: Container(width: 250, child: Divider(),))
+                                          // ),
+                                          // Divider(),
+                                          const SizedBox(height: 24),
+
+                                          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                                            Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                              const Text('NEEDS', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 4,),
+                                              Text(Helper.currencyFormatter(todayBreakdown.needs, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+                                              Text(Helper.currencyFormatter(yesterdayBreakdown.needs, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
+                                            ],),
+                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                              const Text('WANTS', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 4,),
+                                              Text(Helper.currencyFormatter(todayBreakdown.wants, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+                                              Text(Helper.currencyFormatter(yesterdayBreakdown.wants, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
+                                            ],),
+                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                              const Text('SAVE', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 4,),
+                                              Text(Helper.currencyFormatter(todayBreakdown.save, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+                                              Text(Helper.currencyFormatter(yesterdayBreakdown.save, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
+                                            ],),
+                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                            const Text('TXs', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 4,),
+                                              Text(todayBreakdown.count.toString(), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+                                              Text(yesterdayBreakdown.count.toString(), style: const TextStyle(color: ThemeColor.textTertiary)),
+                                            ],),
                                           ],),
 
                                           const SizedBox(height: 32),
@@ -328,7 +377,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                                 ],
                                               ),
                                             ))
-                                          else const Padding(padding: EdgeInsets.only(bottom: 32), child: Text('No expenses recorded today', style: TextStyle(color: ThemeColor.textTertiary))),
+                                          else const Center(child: Padding(padding: EdgeInsets.only(bottom: 32), child: Text('No expenses recorded today', style: TextStyle(color: ThemeColor.textTertiary)))),
                                   ],
                               )),
                           )

@@ -40,15 +40,15 @@ class CardExpenses extends StatelessWidget {
 
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(Helper.currencyFormatter(needs, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
-        const Text('N', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
+        const Text('Needs', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(Helper.currencyFormatter(wants, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
-        const Text('W', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
+        const Text('Wants', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
       Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(Helper.currencyFormatter(save, '-'), style: const TextStyle(color: ThemeColor.textSecondary, fontSize: ThemeFont.bodySmall)),
-        const Text('S', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
+        const Text('Save', style: TextStyle(color: ThemeColor.textTertiary, fontSize: ThemeFont.bodySmall)),
       ],),
     ],))));
   }
