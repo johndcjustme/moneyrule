@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +20,26 @@ class AllTransactionsPage extends StatefulWidget {
 
 class _AllTransactionsPageState extends State<AllTransactionsPage> {
   DateTimeRange? _selectedRange;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounce;
+
+  void _onSearchChanged(String value) {
+    setState(() {});
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchQuery = value.trim().toLowerCase();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   DateTimeRange _todayRange() {
     final now = DateTime.now();
@@ -181,13 +202,20 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
           final allTx = box.values.toList()
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-          final filteredTx = _selectedRange == null
+          var filteredTx = _selectedRange == null
               ? allTx
               : allTx
                   .where((tx) =>
                       !tx.createdAt.isBefore(_selectedRange!.start) &&
                       !tx.createdAt.isAfter(_selectedRange!.end))
                   .toList();
+
+          if (_searchQuery.isNotEmpty) {
+            filteredTx = filteredTx
+                .where((tx) =>
+                    tx.description.toLowerCase().contains(_searchQuery))
+                .toList();
+          }
 
           final incomeTotal = filteredTx
               .where((tx) => tx.isNewIncome)
@@ -214,9 +242,7 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
           final wantsTotal = totalForCategory('Wants');
           final savingsTotal = totalForCategory('Save');
 
-          if (filteredTx.isEmpty) {
-            return const Center(child: Text('No transactions recorded.'));
-          }
+          final bool hasNoTransactions = allTx.isEmpty;
 
           return ListView(
             children: [
@@ -333,12 +359,63 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
                         fontWeight: FontWeight.bold
                       )
                     ),
+
+                    const SizedBox(height: 16,),
+
+                    TextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      decoration: InputDecoration(
+                        hintText: 'Search description...',
+                        hintStyle:
+                            const TextStyle(color: ThemeColor.textTertiary),
+                        prefixIcon: const Icon(Icons.search,
+                            color: ThemeColor.textTertiary),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear,
+                                    color: ThemeColor.textTertiary),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _onSearchChanged('');
+                                },
+                              )
+                            : null,
+                        border: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: ThemeColor.textTertiary),
+                        ),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: ThemeColor.textTertiary),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: ThemeColor.expense, width: 2),
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                      ),
+                    ),
                   ],
                 ),
               ),
               
               // Transaction list
-              ...filteredTx.map((tx) {
+              if (filteredTx.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      hasNoTransactions
+                          ? 'No transactions recorded.'
+                          : 'No transactions match your search.',
+                      style: const TextStyle(color: ThemeColor.textSecondary),
+                    ),
+                  ),
+                )
+              else
+                ...filteredTx.map((tx) {
                 final category = catBox.get(tx.categoryId);
                 return TransactionItem(
                   title: tx.description,
