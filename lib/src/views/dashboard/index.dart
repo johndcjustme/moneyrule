@@ -624,9 +624,14 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Text(DateFormat('MMM y').format(DateTime(_selectedYear, _selectedMonth)).toUpperCase(),
-                    style:
-                        const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),),
+
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(DateFormat('MMM y').format(DateTime(_selectedYear, _selectedMonth)).toUpperCase(),
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
+              const SizedBox(width: 8),
+              Text(Helper.currencyFormatter(totalNeeds + totalWants + totalSavings, '-'), style: TextStyle(color: ThemeColor.textTertiary),)
+            ],),
 
             const SizedBox(height: 10),
 
@@ -771,11 +776,16 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child:
-                Text('YEAR $_selectedYear',
+            // Center(child:
+              
+            // ),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('YEAR $_selectedYear',
                     style:
                         const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
-            ),
+              const SizedBox(width: 8),
+              Text(Helper.currencyFormatter(totalNeeds + totalWants + totalSavings, '-'), style: TextStyle(color: ThemeColor.textTertiary),)
+            ],),
 
             const SizedBox(height: 10),
 
