@@ -96,6 +96,103 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  void _showAddUserDialog() {
+    final nameController = TextEditingController();
+    final passwordController = TextEditingController();
+    final userBox = Hive.box<User>('users');
+    final categoryBox = Hive.box<Category>('categories');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final name = nameController.text.trim();
+              const password = '1234';
+
+              if (name.isEmpty || password.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Fill all fields')),
+                );
+                return;
+              }
+
+              final exists = userBox.values.any((u) => u.name == name);
+              if (exists) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Username already exists')),
+                );
+                return;
+              }
+
+              final newUser = User(
+                id: User.generateId(),
+                name: name,
+                password: password,
+                isLogin: false,
+                type: 'standard',
+              );
+              await userBox.add(newUser);
+
+              final newUserId = newUser.id;
+              await categoryBox.add(
+                Category(name: 'Needs', percentage: 50, amount: 0, userId: newUserId),
+              );
+              await categoryBox.add(
+                Category(name: 'Wants', percentage: 30, amount: 0, userId: newUserId),
+              );
+              await categoryBox.add(
+                Category(name: 'Save', percentage: 20, amount: 0, userId: newUserId),
+              );
+
+              // Log out any currently logged-in user, then log in the new user
+              for (final u in userBox.values) {
+                if (u.isLogin) {
+                  u.isLogin = false;
+                  await u.save();
+                }
+              }
+              newUser.isLogin = true;
+              await newUser.save();
+
+              navigator.pop();
+              navigator.pushReplacementNamed('/dashboard');
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final transactionBox = Hive.box<TransactionModel>('transactions');
@@ -104,7 +201,10 @@ class _DashboardPageState extends State<DashboardPage> {
       body: SafeArea(child: ValueListenableBuilder(
         valueListenable: transactionBox.listenable(),
         builder: (context, Box<TransactionModel> txBox, _) {
-          final transactions = txBox.values.toList();
+          final currentUserId = User.currentUserId();
+          final transactions = txBox.values
+              .where((tx) => tx.userId == currentUserId)
+              .toList();
 
           final incomeTotal = transactions
               .where((tx) => tx.isNewIncome)
@@ -117,7 +217,9 @@ class _DashboardPageState extends State<DashboardPage> {
           final balance = incomeTotal == 0 ? 0.0 : incomeTotal - expenseTotal;
 
           final categoryBox = Hive.box<Category>('categories');
-          final categories = categoryBox.values.toList();
+          final categories = categoryBox.values
+              .where((c) => c.userId == currentUserId)
+              .toList();
 
           final recentTransactions = transactions.toList()
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -195,9 +297,20 @@ class _DashboardPageState extends State<DashboardPage> {
                               backgroundColor: ThemeColor.expense,
                               child: Icon(Icons.person, size: 20, color: ThemeColor.textSecondary),
                             ),
-                            onSelected: (value) {
+                            onSelected: (value) async {
                               if (value == 'account') {
                                 Navigator.pushNamed(context, '/account');
+                              } else if (value.startsWith('switch:')) {
+                                final targetId = value.substring('switch:'.length);
+                                final navigator = Navigator.of(context);
+                                final userBox = Hive.box<User>('users');
+                                for (final u in userBox.values) {
+                                  u.isLogin = u.id == targetId;
+                                  await u.save();
+                                }
+                                navigator.pushReplacementNamed('/dashboard');
+                              } else if (value == 'add_user') {
+                                _showAddUserDialog();
                               } else if (value == 'logout') {
                                 showDialog(
                                   context: context,
@@ -230,9 +343,21 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
 
                               // list of users here
-                              
+                              for (final user in Hive.box<User>('users').values)
+                                PopupMenuItem(
+                                  value: 'switch:${user.id}',
+                                  child: ListTile(
+                                    leading: Icon(
+                                      user.isLogin ? Icons.check_circle : Icons.person,
+                                      color: user.isLogin ? ThemeColor.income : null,
+                                    ),
+                                    title: Text(user.name),
+                                    trailing: user.isLogin ? const Text('Active') : null,
+                                  ),
+                                ),
+
                               const PopupMenuItem(
-                                value: 'logout',
+                                value: 'add_user',
                                 child: ListTile(
                                   leading: Icon(Icons.add),
                                   title: Text('Add User'),

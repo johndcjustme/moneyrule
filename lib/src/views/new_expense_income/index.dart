@@ -29,6 +29,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
   @override
   Widget build(BuildContext context) {
     final categoriesBox = Hive.box<Category>('categories');
+    final currentUserId = User.currentUserId();
 
     return Scaffold(
       appBar:
@@ -60,7 +61,9 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                 }
 
                 final txBox = Hive.box<TransactionModel>('transactions');
-                final allTransactions = txBox.values.toList();
+                final allTransactions = txBox.values
+                    .where((tx) => tx.userId == currentUserId)
+                    .toList();
 
                 final filteredDescriptions = allTransactions
                     .where((tx) =>
@@ -110,7 +113,9 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                 ValueListenableBuilder(
                   valueListenable: categoriesBox.listenable(),
                   builder: (context, Box<Category> box, _) {
-                    final categories = box.values.toList();
+                    final categories = box.values
+                        .where((c) => c.userId == currentUserId)
+                        .toList();
 
                     if (categories.isEmpty) {
                       return const Text('No categories available');
@@ -135,7 +140,9 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
               ValueListenableBuilder(
                 valueListenable: categoriesBox.listenable(),
                 builder: (context, Box<Category> box, _) {
-                  final categories = box.values.toList();
+                  final categories = box.values
+                      .where((c) => c.userId == currentUserId)
+                      .toList();
 
                   if (categories.isEmpty) {
                     return const Text('No categories available');
@@ -185,7 +192,8 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
 
                 if (widget.isIncome) {
                   if (_splitIncome) {
-                    for (final category in categoryBox.values) {
+                    for (final category in categoryBox.values.where(
+                        (c) => c.userId == currentUserId)) {
                       final splitAmount = (category.percentage / 100) * amount;
                       final tx = TransactionModel(
                         categoryId: category.key as int,

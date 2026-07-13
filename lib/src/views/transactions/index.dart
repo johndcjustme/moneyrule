@@ -10,6 +10,7 @@ import 'package:moneyrule/src/utils/theme_front.dart';
 import '../../helpers/helper.dart';
 import '../../models/category.dart';
 import '../../models/transaction_model.dart';
+import '../../models/user.dart';
 
 class AllTransactionsPage extends StatefulWidget {
   const AllTransactionsPage({super.key});
@@ -77,6 +78,7 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
   Widget build(BuildContext context) {
     final txBox = Hive.box<TransactionModel>('transactions');
     final catBox = Hive.box<Category>('categories');
+    final currentUserId = User.currentUserId();
 
     return Scaffold(
       appBar: AppBar(
@@ -199,7 +201,9 @@ class _AllTransactionsPageState extends State<AllTransactionsPage> {
       body: ValueListenableBuilder(
         valueListenable: txBox.listenable(),
         builder: (context, Box<TransactionModel> box, _) {
-          final allTx = box.values.toList()
+          final allTx = box.values
+              .where((tx) => tx.userId == currentUserId)
+              .toList()
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
           var filteredTx = _selectedRange == null

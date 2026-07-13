@@ -26,8 +26,9 @@ class ExcelService {
 
     final txBox = Hive.box<TransactionModel>('transactions');
     final catBox = Hive.box<Category>('categories');
+    final currentUserId = User.currentUserId();
 
-    for (final tx in txBox.values) {
+    for (final tx in txBox.values.where((tx) => tx.userId == currentUserId)) {
       final category = catBox.get(tx.categoryId)?.name ?? 'Unknown';
       sheet.appendRow([
         tx.createdAt.toIso8601String(),
