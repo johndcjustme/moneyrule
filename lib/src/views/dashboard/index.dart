@@ -300,6 +300,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             onSelected: (value) async {
                               if (value == 'account') {
                                 Navigator.pushNamed(context, '/account');
+                              } else if (value == 'categories') {
+                                Navigator.pushNamed(context, '/categories');
                               } else if (value.startsWith('switch:')) {
                                 final targetId = value.substring('switch:'.length);
                                 final navigator = Navigator.of(context);
@@ -341,6 +343,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                   title: Text('Account Settings'),
                                 ),
                               ),
+                              // const PopupMenuItem(
+                              //   value: 'categories',
+                              //   child: ListTile(
+                              //     leading: Icon(Icons.category),
+                              //     title: Text('Categories'),
+                              //   ),
+                              // ),
                               // PopupMenuDivider(),
                                 const PopupMenuItem<String>(
                                 enabled: false, // Disables tap actions and styling

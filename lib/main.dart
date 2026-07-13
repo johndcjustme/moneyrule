@@ -9,6 +9,7 @@ import 'package:moneyrule/src/views/partials/what.dart';
 import 'src/models/category.dart';
 import 'src/models/user.dart';
 import 'src/models/transaction_model.dart';
+import 'src/views/categories/index.dart';
 import 'src/views/account/index.dart';
 import 'src/views/transactions/index.dart';
 
@@ -149,6 +150,7 @@ class MainApp extends StatelessWidget {
         '/new-income': (_) => const NewTransactionPage(isIncome: true),
         '/transactions': (_) => const AllTransactionsPage(), // ✅ New route
         '/account': (_) => const AccountPage(), // ✅ New route
+        '/categories': (_) => const CategoriesPage(), // ✅ New route
         '/budget-rule': (_) => const BudgetRuleInfo(),
       },
     );
