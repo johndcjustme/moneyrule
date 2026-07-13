@@ -228,6 +228,16 @@ class _DashboardPageState extends State<DashboardPage> {
                                   title: Text('Account Settings'),
                                 ),
                               ),
+
+                              // list of users here
+                              
+                              const PopupMenuItem(
+                                value: 'logout',
+                                child: ListTile(
+                                  leading: Icon(Icons.add),
+                                  title: Text('Add User'),
+                                ),
+                              ),
                               const PopupMenuItem(
                                 value: 'logout',
                                 child: ListTile(
