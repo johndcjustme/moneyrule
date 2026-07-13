@@ -21,6 +21,7 @@ class ExcelService {
       'Type',
       'Category',
       'Amount',
+      'User ID',
     ]);
 
     final txBox = Hive.box<TransactionModel>('transactions');
@@ -34,11 +35,11 @@ class ExcelService {
         tx.isNewIncome ? 'Income' : 'Expense',
         category,
         tx.amount,
+        tx.userId ?? '',
       ]);
     }
 
-    final directory = await getExternalStorageDirectory();
-    if (directory == null) return null;
+    final directory = await getApplicationDocumentsDirectory();
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final fileName = 'transactions_$timestamp.xlsx';
@@ -80,7 +81,6 @@ class ExcelService {
     final sheet = excel['Transactions'];
     final txBox = Hive.box<TransactionModel>('transactions');
     final catBox = Hive.box<Category>('categories');
-    final userId = User.currentUserId();
 
     for (var row in sheet.rows.skip(1)) {
       final date = DateTime.parse(row[0]!.value.toString());
@@ -88,6 +88,10 @@ class ExcelService {
       final isIncome = row[2]!.value.toString().toLowerCase() == 'income';
       final categoryName = row[3]!.value.toString();
       final amount = double.parse(row[4]!.value.toString());
+      final rowUserId = row.length > 5 ? row[5]?.value.toString() : null;
+      final userId = (rowUserId != null && rowUserId.isNotEmpty)
+          ? rowUserId
+          : User.currentUserId();
 
       Category? category;
       try {
