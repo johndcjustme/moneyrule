@@ -30,7 +30,31 @@ void main() async {
   await Hive.openBox('session');
 
   if (userBox.isEmpty) {
-    await userBox.add(User(name: 'admin', password: '1234', isLogin: false));
+    await userBox.add(
+      User(
+        id: User.generateId(),
+        name: 'admin',
+        password: '1234',
+        isLogin: true,
+        type: 'default',
+      ),
+    );
+  }
+
+  // Migrate existing users: fill in id and type if missing
+  for (final user in userBox.values) {
+    var changed = false;
+    if (user.id == null || user.id!.isEmpty) {
+      user.id = User.generateId();
+      changed = true;
+    }
+    if (user.type == null || user.type!.isEmpty) {
+      user.type = 'default';
+      changed = true;
+    }
+    if (changed) {
+      await user.save();
+    }
   }
 
   // Insert default categories if empty

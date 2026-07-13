@@ -63,6 +63,16 @@ class _AccountPageState extends State<AccountPage> {
               obscureText: _obscurePassword,
             ),
             const SizedBox(height: 24),
+            if (_user != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('User ID: ${_user!.id ?? '-'}', style: const TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 4),
+                  Text('Type: ${_user!.type ?? 'default'}', style: const TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ElevatedButton(
               onPressed: () {
                 User.updateData(context, _user, _nameController.text.trim(), _passwordController.text);

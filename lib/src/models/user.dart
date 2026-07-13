@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -17,12 +19,27 @@ class User extends HiveObject {
   @HiveField(3)
   String? notes;
 
+  @HiveField(4)
+  String? id;
+
+  @HiveField(5)
+  String? type;
+
   User({
     required this.name,
     required this.password,
     this.isLogin = false, // default to logged out
     this.notes,
+    this.id,
+    this.type,
   });
+
+  static String generateId() {
+    final random = Random();
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+    final randomPart = random.nextInt(0x7fffffff).toRadixString(16).padLeft(8, '0');
+    return '$timestamp$randomPart';
+  }
 
   static void updateData(BuildContext context, user, updatedName, updatedPassword) {
      if (user != null) {
