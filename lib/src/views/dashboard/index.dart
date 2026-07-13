@@ -273,7 +273,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                                           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                             Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                              const Text('Today', style: TextStyle(color: ThemeColor.textPrimary, fontWeight: FontWeight.bold)),
+                                              const Text('TODAY', style: TextStyle(color: ThemeColor.textPrimary, fontWeight: FontWeight.bold)),
                                               Text(Helper.currencyFormatter(todayBreakdown.total, '-'), style: const TextStyle(fontSize: ThemeFont.titleLarge, color: ThemeColor.textSecondary)),
                                               Center(child: Container(width: 200, child: const Divider(color: ThemeColor.textTertiary, thickness: 0.5,),)),
                                               Text(Helper.currencyFormatter(yesterdayBreakdown.total, '-'), style: const TextStyle(fontSize: ThemeFont.bodyMedium, color: ThemeColor.textTertiary, fontWeight: FontWeight.bold)),
@@ -293,31 +293,31 @@ class _DashboardPageState extends State<DashboardPage> {
                                           // Divider(),
                                           const SizedBox(height: 24),
 
-                                          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                                            Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                                               const Text('NEEDS', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 4,),
                                               Text(Helper.currencyFormatter(todayBreakdown.needs, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
                                               Text(Helper.currencyFormatter(yesterdayBreakdown.needs, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
-                                            ],),
-                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                            ],)),
+                                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                                               const Text('WANTS', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 4,),
                                               Text(Helper.currencyFormatter(todayBreakdown.wants, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
                                               Text(Helper.currencyFormatter(yesterdayBreakdown.wants, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
-                                            ],),
-                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                            ],)),
+                                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                                               const Text('SAVE', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 4,),
                                               Text(Helper.currencyFormatter(todayBreakdown.save, '-'), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
                                               Text(Helper.currencyFormatter(yesterdayBreakdown.save, '-'), style: const TextStyle(color: ThemeColor.textTertiary)),
-                                            ],),
-                                                                                        Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                            ],)),
+                                            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                                             const Text('TXs', style: TextStyle(fontSize: ThemeFont.bodySmall, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 4,),
                                               Text(todayBreakdown.count.toString(), style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColor.textSecondary)),
                                               Text(yesterdayBreakdown.count.toString(), style: const TextStyle(color: ThemeColor.textTertiary)),
-                                            ],),
+                                            ],)),
                                           ],),
 
                                           const SizedBox(height: 32),
