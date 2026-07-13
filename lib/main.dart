@@ -27,7 +27,7 @@ void main() async {
   final userBox = await Hive.openBox<User>('users');
   final categoryBox = await Hive.openBox<Category>('categories');
   await Hive.openBox<TransactionModel>('transactions');
-  await Hive.openBox('session');
+  await Hive.openBox('session');  
 
   if (userBox.isEmpty) {
     await userBox.add(
@@ -44,6 +44,16 @@ void main() async {
   // Migrate existing users: fill in id and type if missing
   for (final user in userBox.values) {
     var changed = false;
+    // if (user.type == 'default') {
+    //   user.isLogin = true;
+    //   changed = true;
+    // } 
+    
+    // if (user.type != 'default') {
+    //   user.isLogin = false;
+    //   changed = true;
+    // }
+
     if (user.id == null || user.id!.isEmpty) {
       user.id = User.generateId();
       changed = true;
@@ -96,17 +106,22 @@ void main() async {
     }
   }
 
-  runApp(const MainApp());
+  final initialRoute =
+      userBox.values.any((user) => user.isLogin) ? '/dashboard' : '/';
+
+  runApp(MainApp(initialRoute: initialRoute));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final String initialRoute;
+
+  const MainApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SplitWise',
-      initialRoute: '/',
+      initialRoute: initialRoute,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       theme: ThemeData(

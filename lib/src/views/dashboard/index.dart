@@ -98,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _showAddUserDialog() {
     final nameController = TextEditingController();
-    final passwordController = TextEditingController();
+    // final passwordController = TextEditingController();
     final userBox = Hive.box<User>('users');
     final categoryBox = Hive.box<Category>('categories');
 
@@ -116,15 +116,15 @@ class _DashboardPageState extends State<DashboardPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
+            // const SizedBox(height: 16),
+            // TextField(
+            //   controller: passwordController,
+            //   decoration: const InputDecoration(
+            //     labelText: 'Password',
+            //     border: OutlineInputBorder(),
+            //   ),
+            //   obscureText: true,
+            // ),
           ],
         ),
         actions: [
@@ -341,7 +341,17 @@ class _DashboardPageState extends State<DashboardPage> {
                                   title: Text('Account Settings'),
                                 ),
                               ),
-
+                              // PopupMenuDivider(),
+                                const PopupMenuItem<String>(
+                                enabled: false, // Disables tap actions and styling
+                                child: Text(
+                                  'USERS',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: ThemeColor.textSecondary,
+                                  ),
+                                ),
+                              ),
                               // list of users here
                               for (final user in Hive.box<User>('users').values)
                                 PopupMenuItem(
@@ -352,7 +362,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       color: user.isLogin ? ThemeColor.income : null,
                                     ),
                                     title: Text(user.name),
-                                    trailing: user.isLogin ? const Text('Active') : null,
+                                    trailing: user.isLogin ? const Text('Active', style: TextStyle(color: ThemeColor.income)) : null,
                                   ),
                                 ),
 
@@ -363,13 +373,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                   title: Text('Add User'),
                                 ),
                               ),
-                              const PopupMenuItem(
-                                value: 'logout',
-                                child: ListTile(
-                                  leading: Icon(Icons.logout),
-                                  title: Text('Logout'),
-                                ),
-                              ),
+                              // const PopupMenuItem(
+                              //   value: 'logout',
+                              //   child: ListTile(
+                              //     leading: Icon(Icons.logout),
+                              //     title: Text('Logout'),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ]),
