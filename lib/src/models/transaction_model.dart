@@ -19,11 +19,15 @@ class TransactionModel extends HiveObject {
   @HiveField(4)
   DateTime createdAt;
 
+  @HiveField(5)
+  String? userId;
+
   TransactionModel({
     required this.categoryId,
     required this.amount,
     required this.description,
     required this.isNewIncome,
     required this.createdAt,
+    this.userId,
   });
 }

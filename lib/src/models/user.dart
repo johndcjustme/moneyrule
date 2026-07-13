@@ -41,6 +41,16 @@ class User extends HiveObject {
     return '$timestamp$randomPart';
   }
 
+  static String? currentUserId() {
+    try {
+      final userBox = Hive.box<User>('users');
+      final user = userBox.values.firstWhere((user) => user.isLogin == true);
+      return user.id;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static void updateData(BuildContext context, user, updatedName, updatedPassword) {
      if (user != null) {
       user!.name = updatedName;

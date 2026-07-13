@@ -6,6 +6,7 @@ import 'package:moneyrule/src/utils/theme_color.dart';
 import 'package:moneyrule/src/utils/theme_front.dart';
 import '../../models/category.dart';
 import '../../models/transaction_model.dart';
+import '../../models/user.dart';
 
 // import '../models/category.dart';
 // import '../models/transaction_model.dart';
@@ -180,6 +181,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                 final transactionBox =
                     Hive.box<TransactionModel>('transactions');
                 final categoryBox = Hive.box<Category>('categories');
+                final userId = User.currentUserId();
 
                 if (widget.isIncome) {
                   if (_splitIncome) {
@@ -191,6 +193,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                         description: description,
                         isNewIncome: true,
                         createdAt: DateTime.now(),
+                        userId: userId,
                       );
                       transactionBox.add(tx);
                     }
@@ -201,6 +204,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                       description: description,
                       isNewIncome: true,
                       createdAt: DateTime.now(),
+                      userId: userId,
                     );
                     transactionBox.add(tx);
                   }
@@ -211,6 +215,7 @@ class _NewTransactionPageState extends State<NewTransactionPage> {
                     description: description,
                     isNewIncome: false,
                     createdAt: DateTime.now(),
+                    userId: userId,
                   );
                   transactionBox.add(tx);
                 }

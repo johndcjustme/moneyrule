@@ -59,9 +59,41 @@ void main() async {
 
   // Insert default categories if empty
   if (categoryBox.isEmpty) {
-    await categoryBox.add(Category(name: 'Needs', percentage: 50, amount: 0));
-    await categoryBox.add(Category(name: 'Wants', percentage: 30, amount: 0));
-    await categoryBox.add(Category(name: 'Save', percentage: 20, amount: 0));
+    final defaultUserId =
+        userBox.values.where((user) => user.type == 'default').firstOrNull?.id ??
+            userBox.values.firstOrNull?.id;
+    await categoryBox.add(
+      Category(name: 'Needs', percentage: 50, amount: 0, userId: defaultUserId),
+    );
+    await categoryBox.add(
+      Category(name: 'Wants', percentage: 30, amount: 0, userId: defaultUserId),
+    );
+    await categoryBox.add(
+      Category(name: 'Save', percentage: 20, amount: 0, userId: defaultUserId),
+    );
+  }
+
+  // Migrate existing categories: fill in userId if missing
+  for (final category in categoryBox.values) {
+    if (category.userId == null || category.userId!.isEmpty) {
+      final defaultUserId =
+          userBox.values.where((user) => user.type == 'default').firstOrNull?.id ??
+              userBox.values.firstOrNull?.id;
+      category.userId = defaultUserId;
+      await category.save();
+    }
+  }
+
+  // Migrate existing transactions: fill in userId if missing
+  final transactionBox = Hive.box<TransactionModel>('transactions');
+  for (final tx in transactionBox.values) {
+    if (tx.userId == null || tx.userId!.isEmpty) {
+      final defaultUserId =
+          userBox.values.where((user) => user.type == 'default').firstOrNull?.id ??
+              userBox.values.firstOrNull?.id;
+      tx.userId = defaultUserId;
+      await tx.save();
+    }
   }
 
   runApp(const MainApp());

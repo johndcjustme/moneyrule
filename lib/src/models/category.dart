@@ -13,9 +13,13 @@ class Category extends HiveObject {
   @HiveField(2)
   double amount;
 
+  @HiveField(3)
+  String? userId;
+
   Category({
     required this.name,
     required this.percentage,
     required this.amount,
+    this.userId,
   });
 }

@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/category.dart';
 import '../models/transaction_model.dart';
+import '../models/user.dart';
 import 'package:path/path.dart' as p;
 
 class ExcelService {
@@ -79,6 +80,7 @@ class ExcelService {
     final sheet = excel['Transactions'];
     final txBox = Hive.box<TransactionModel>('transactions');
     final catBox = Hive.box<Category>('categories');
+    final userId = User.currentUserId();
 
     for (var row in sheet.rows.skip(1)) {
       final date = DateTime.parse(row[0]!.value.toString());
@@ -104,6 +106,7 @@ class ExcelService {
         description: description,
         isNewIncome: isIncome,
         createdAt: date,
+        userId: userId,
       );
 
       await txBox.add(tx);
