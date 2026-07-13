@@ -343,13 +343,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                   title: Text('Account Settings'),
                                 ),
                               ),
-                              // const PopupMenuItem(
-                              //   value: 'categories',
-                              //   child: ListTile(
-                              //     leading: Icon(Icons.category),
-                              //     title: Text('Categories'),
-                              //   ),
-                              // ),
+                              const PopupMenuItem(
+                                value: 'categories',
+                                child: ListTile(
+                                  leading: Icon(Icons.category),
+                                  title: Text('Categories'),
+                                ),
+                              ),
                               // PopupMenuDivider(),
                                 const PopupMenuItem<String>(
                                 enabled: false, // Disables tap actions and styling
